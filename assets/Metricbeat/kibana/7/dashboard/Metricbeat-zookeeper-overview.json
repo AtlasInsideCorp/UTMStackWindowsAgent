@@ -1,0 +1,103 @@
+{
+    "objects": [
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Approximate data size [Metricbeat Zookeeper] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"time_field\": \"@timestamp\", \"series\": [{\"line_width\": 1, \"point_size\": 1, \"color\": \"#68BC00\", \"stacked\": \"none\", \"label\": \"Approximate data size\", \"metrics\": [{\"field\": \"zookeeper.mntr.approximate_data_size\", \"type\": \"avg\", \"id\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"bytes\", \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"fill\": 0.5}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"show_legend\": 1, \"axis_position\": \"left\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"axis_min\": \"0\", \"show_grid\": 1, \"index_pattern\": \"metricbeat-*\", \"type\": \"timeseries\", \"axis_scale\": \"normal\"}, \"aggs\": [], \"title\": \"Approximate data size [Metricbeat Zookeeper] ECS\"}"
+            }, 
+            "id": "8d3b7770-2319-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "visualization", 
+            "updated_at": "2019-01-30T13:29:19.163Z", 
+            "version": 2
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Latency [Metricbeat Zookeeper] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"time_field\": \"@timestamp\", \"series\": [{\"line_width\": 1, \"point_size\": 1, \"color\": \"#68BC00\", \"stacked\": \"none\", \"label\": \"Latency\", \"metrics\": [{\"field\": \"zookeeper.mntr.latency.avg\", \"type\": \"avg\", \"id\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"ms,ms,2\", \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"fill\": 0.5}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"show_legend\": 1, \"axis_position\": \"left\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"axis_min\": \"0\", \"show_grid\": 1, \"index_pattern\": \"metricbeat-*\", \"type\": \"timeseries\", \"axis_scale\": \"normal\"}, \"aggs\": [], \"title\": \"Latency [Metricbeat Zookeeper] ECS\"}"
+            }, 
+            "id": "c0be43c0-2319-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "visualization", 
+            "updated_at": "2019-01-30T13:29:05.974Z", 
+            "version": 2
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Alive Connections [Metricbeat Zookeeper] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"time_field\": \"@timestamp\", \"series\": [{\"line_width\": 1, \"point_size\": 1, \"color\": \"#68BC00\", \"stacked\": \"none\", \"label\": \"Alive connections\", \"metrics\": [{\"field\": \"zookeeper.mntr.num_alive_connections\", \"type\": \"avg\", \"id\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"0,0.[00]\", \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"fill\": 0.5}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"show_legend\": 1, \"axis_position\": \"left\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"axis_min\": \"0\", \"show_grid\": 1, \"index_pattern\": \"metricbeat-*\", \"type\": \"timeseries\", \"axis_scale\": \"normal\"}, \"aggs\": [], \"title\": \"Alive Connections [Metricbeat Zookeeper] ECS\"}"
+            }, 
+            "id": "1c2f8930-231a-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "visualization", 
+            "updated_at": "2019-01-30T13:28:52.034Z", 
+            "version": 3
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Used file descriptors [Metricbeat Zookeeper] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"time_field\": \"@timestamp\", \"series\": [{\"line_width\": 1, \"point_size\": 1, \"color\": \"#68BC00\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"Used file descriptors\", \"metrics\": [{\"metric_agg\": \"avg\", \"field\": \"zookeeper.mntr.open_file_descriptor_count\", \"type\": \"avg\", \"id\": \"b92e4550-231a-11e9-9e57-679640dc0c7c\"}, {\"field\": \"zookeeper.mntr.max_file_descriptor_count\", \"type\": \"avg\", \"id\": \"918d0c60-231b-11e9-9e57-679640dc0c7c\"}, {\"variables\": [{\"field\": \"b92e4550-231a-11e9-9e57-679640dc0c7c\", \"id\": \"81c03fa0-231b-11e9-9e57-679640dc0c7c\", \"name\": \"a\"}, {\"field\": \"918d0c60-231b-11e9-9e57-679640dc0c7c\", \"id\": \"8a3af6c0-231b-11e9-9e57-679640dc0c7c\", \"name\": \"b\"}], \"type\": \"math\", \"id\": \"7e4d11e0-231b-11e9-9e57-679640dc0c7c\", \"script\": \"params.a/params.b\"}], \"axis_min\": \"0\", \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 1, \"axis_position\": \"left\", \"formatter\": \"percent\", \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"fill\": \"0.1\"}, {\"line_width\": \"1\", \"point_size\": 1, \"color\": \"rgba(0,98,177,1)\", \"stacked\": \"none\", \"label\": \"Open file descriptors\", \"metrics\": [{\"field\": \"zookeeper.mntr.open_file_descriptor_count\", \"type\": \"avg\", \"id\": \"dffaffe1-23cc-11e9-b1ff-37c851471450\"}], \"axis_min\": \"0\", \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 1, \"axis_position\": \"right\", \"formatter\": \"0,0.[00]\", \"id\": \"dffaffe0-23cc-11e9-b1ff-37c851471450\", \"fill\": \"0\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"axis_position\": \"left\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"show_legend\": 1, \"show_grid\": 1, \"index_pattern\": \"metricbeat-*\", \"type\": \"timeseries\", \"axis_scale\": \"normal\"}, \"aggs\": [], \"title\": \"Used file descriptors [Metricbeat Zookeeper] ECS\"}"
+            }, 
+            "id": "ddb13c60-231b-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "visualization", 
+            "updated_at": "2019-01-30T13:28:22.583Z", 
+            "version": 5
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Packets received / sent [Metricbeat Zookeeper] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"time_field\": \"@timestamp\", \"series\": [{\"line_width\": \"2\", \"point_size\": \"0\", \"color\": \"#68BC00\", \"stacked\": \"none\", \"label\": \"Packets received\", \"metrics\": [{\"field\": \"zookeeper.mntr.packets.received\", \"type\": \"avg\", \"id\": \"61ca57f2-469d-11e7-af02-69e470af7417\"}, {\"field\": \"61ca57f2-469d-11e7-af02-69e470af7417\", \"type\": \"derivative\", \"id\": \"34949540-231c-11e9-9707-f128cdaa3bf2\", \"unit\": \"\"}], \"split_filters\": [{\"color\": \"#68BC00\", \"id\": \"5811d190-231c-11e9-9707-f128cdaa3bf2\"}], \"split_mode\": \"terms\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"0,0.[00]\", \"id\": \"61ca57f1-469d-11e7-af02-69e470af7417\", \"fill\": \"0\"}, {\"line_width\": \"2\", \"point_size\": \"0\", \"color\": \"rgba(115,216,255,1)\", \"stacked\": \"none\", \"label\": \"Packets sent\", \"metrics\": [{\"field\": \"zookeeper.mntr.packets.sent\", \"type\": \"avg\", \"id\": \"753b2e61-231c-11e9-9707-f128cdaa3bf2\"}, {\"field\": \"753b2e61-231c-11e9-9707-f128cdaa3bf2\", \"type\": \"derivative\", \"id\": \"7ed33c60-231c-11e9-9707-f128cdaa3bf2\", \"unit\": \"\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"0,0.[00]\", \"id\": \"753b2e60-231c-11e9-9707-f128cdaa3bf2\", \"fill\": \"0\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"show_legend\": 1, \"axis_position\": \"left\", \"id\": \"61ca57f0-469d-11e7-af02-69e470af7417\", \"axis_min\": \"0\", \"show_grid\": 1, \"index_pattern\": \"metricbeat-*\", \"type\": \"timeseries\", \"axis_scale\": \"normal\"}, \"aggs\": [], \"title\": \"Packets received / sent [Metricbeat Zookeeper] ECS\"}"
+            }, 
+            "id": "d2f52b50-231c-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "visualization", 
+            "updated_at": "2019-01-30T13:26:42.583Z", 
+            "version": 3
+        }, 
+        {
+            "attributes": {
+                "description": "Overview of Zookeeper", 
+                "hits": 0, 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "optionsJSON": "{\"useMargins\": true, \"darkTheme\": false, \"hidePanelTitles\": false}", 
+                "panelsJSON": "[{\"gridData\": {\"i\": \"1\", \"h\": 15, \"y\": 15, \"w\": 15, \"x\": 0}, \"title\": \"Approximate data size\", \"panelIndex\": \"1\", \"embeddableConfig\": {}, \"version\": \"7.0.0-alpha2\", \"type\": \"visualization\", \"id\": \"8d3b7770-2319-11e9-bb66-8baac426dfd4-ecs\"}, {\"gridData\": {\"i\": \"2\", \"h\": 15, \"y\": 15, \"w\": 17, \"x\": 15}, \"title\": \"Latency\", \"panelIndex\": \"2\", \"embeddableConfig\": {}, \"version\": \"7.0.0-alpha2\", \"type\": \"visualization\", \"id\": \"c0be43c0-2319-11e9-bb66-8baac426dfd4-ecs\"}, {\"gridData\": {\"i\": \"3\", \"h\": 15, \"y\": 15, \"w\": 16, \"x\": 32}, \"title\": \"Alive Connections\", \"panelIndex\": \"3\", \"embeddableConfig\": {}, \"version\": \"7.0.0-alpha2\", \"type\": \"visualization\", \"id\": \"1c2f8930-231a-11e9-bb66-8baac426dfd4-ecs\"}, {\"gridData\": {\"i\": \"4\", \"h\": 15, \"y\": 0, \"w\": 25, \"x\": 23}, \"title\": \"Used file descriptors\", \"panelIndex\": \"4\", \"embeddableConfig\": {}, \"version\": \"7.0.0-alpha2\", \"type\": \"visualization\", \"id\": \"ddb13c60-231b-11e9-bb66-8baac426dfd4-ecs\"}, {\"gridData\": {\"i\": \"5\", \"h\": 15, \"y\": 0, \"w\": 23, \"x\": 0}, \"title\": \"Packets received / sent\", \"panelIndex\": \"5\", \"embeddableConfig\": {}, \"version\": \"7.0.0-alpha2\", \"type\": \"visualization\", \"id\": \"d2f52b50-231c-11e9-bb66-8baac426dfd4-ecs\"}]", 
+                "timeRestore": false, 
+                "title": "[Metricbeat Zookeeper] Overview ECS", 
+                "version": 1
+            }, 
+            "id": "467207a0-231e-11e9-bb66-8baac426dfd4-ecs", 
+            "type": "dashboard", 
+            "updated_at": "2019-01-30T13:34:01.235Z", 
+            "version": 6
+        }
+    ], 
+    "version": "7.0.0-alpha2"
+}

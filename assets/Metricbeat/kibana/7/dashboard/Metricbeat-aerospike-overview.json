@@ -1,0 +1,270 @@
+{
+    "objects": [
+        {
+            "attributes": {
+                "description": "This Aerospike dashboard visualizes the most important metrics for Aerospike namespaces.", 
+                "hits": 0, 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [{\"query\": {\"match\": {\"aerospike.namespace.name\": {\"query\": \"metricbeat\", \"type\": \"phrase\"}}}, \"meta\": {\"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\", \"controlledBy\": \"1565367993423\", \"value\": \"metricbeat\", \"disabled\": false, \"alias\": null, \"params\": {\"query\": \"metricbeat\"}, \"key\": \"aerospike.namespace.name\", \"negate\": false, \"type\": \"phrase\"}, \"$state\": {\"store\": \"appState\"}}], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "optionsJSON": "{\"useMargins\": true, \"hidePanelTitles\": false}", 
+                "panelsJSON": "[{\"gridData\": {\"i\": \"1\", \"h\": 6, \"y\": 0, \"w\": 9, \"x\": 0}, \"title\": \"Namespace Filter\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_0\", \"panelIndex\": \"1\"}, {\"gridData\": {\"i\": \"2\", \"h\": 6, \"y\": 6, \"w\": 9, \"x\": 0}, \"title\": \"Node Filter\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_1\", \"panelIndex\": \"2\"}, {\"gridData\": {\"i\": \"3\", \"h\": 13, \"y\": 12, \"w\": 25, \"x\": 23}, \"title\": \"Client Error Rates\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_2\", \"panelIndex\": \"3\"}, {\"gridData\": {\"i\": \"4\", \"h\": 12, \"y\": 0, \"w\": 25, \"x\": 23}, \"title\": \"Client Success Rates\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_3\", \"panelIndex\": \"4\"}, {\"gridData\": {\"i\": \"5\", \"h\": 13, \"y\": 25, \"w\": 25, \"x\": 23}, \"title\": \"Client Timeout Rates\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_4\", \"panelIndex\": \"5\"}, {\"gridData\": {\"i\": \"6\", \"h\": 13, \"y\": 25, \"w\": 23, \"x\": 0}, \"title\": \"Disk Space\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_5\", \"panelIndex\": \"6\"}, {\"gridData\": {\"i\": \"7\", \"h\": 12, \"y\": 0, \"w\": 14, \"x\": 9}, \"title\": \"Number of Objects\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_6\", \"panelIndex\": \"7\"}, {\"gridData\": {\"i\": \"8\", \"h\": 13, \"y\": 12, \"w\": 12, \"x\": 0}, \"title\": \"Writes per second\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_7\", \"panelIndex\": \"8\"}, {\"gridData\": {\"i\": \"9\", \"h\": 13, \"y\": 12, \"w\": 11, \"x\": 12}, \"title\": \"Reads per second\", \"embeddableConfig\": {}, \"version\": \"7.3.0\", \"panelRefName\": \"panel_8\", \"panelIndex\": \"9\"}]", 
+                "timeRestore": false, 
+                "title": "[Metricbeat Aerospike] Database Overview ", 
+                "version": 1
+            }, 
+            "id": "b15668d0-bac3-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "dashboard": "7.3.0"
+            }, 
+            "references": [
+                {
+                    "id": "metricbeat-*", 
+                    "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index", 
+                    "type": "index-pattern"
+                }, 
+                {
+                    "id": "72523510-bac3-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_0", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "8c173130-bac3-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_1", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "b5121f00-bac8-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_2", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "5b9bf0d0-bac9-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_3", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "23758d10-bac9-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_4", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "bd767280-bac9-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_5", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "9ce7ae20-baca-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_6", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "3586e810-bac8-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_7", 
+                    "type": "visualization"
+                }, 
+                {
+                    "id": "eae846a0-bac7-11e9-a579-f5c0a5d81340", 
+                    "name": "panel_8", 
+                    "type": "visualization"
+                }
+            ], 
+            "type": "dashboard", 
+            "updated_at": "2019-08-19T14:43:04.899Z", 
+            "version": "WzE1NTUsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Namespace Filter [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"input_control_vis\", \"params\": {\"pinFilters\": false, \"useTimeFilter\": true, \"updateFiltersOnChange\": true, \"controls\": [{\"parent\": \"\", \"indexPatternRefName\": \"control_0_index_pattern\", \"label\": \"namespace\", \"fieldName\": \"aerospike.namespace.name\", \"id\": \"1565367993423\", \"type\": \"list\", \"options\": {\"type\": \"terms\", \"size\": 5, \"multiselect\": false, \"dynamicOptions\": true, \"order\": \"desc\"}}]}, \"aggs\": [], \"title\": \"Namespace Filter [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "72523510-bac3-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [
+                {
+                    "id": "metricbeat-*", 
+                    "name": "control_0_index_pattern", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T16:36:43.172Z", 
+            "version": "WzEzNzIsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Node Filter [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"input_control_vis\", \"params\": {\"pinFilters\": false, \"useTimeFilter\": true, \"updateFiltersOnChange\": true, \"controls\": [{\"parent\": \"\", \"indexPatternRefName\": \"control_0_index_pattern\", \"label\": \"node\", \"fieldName\": \"aerospike.namespace.node.host\", \"id\": \"1565367993423\", \"type\": \"list\", \"options\": {\"type\": \"terms\", \"size\": 5, \"multiselect\": false, \"dynamicOptions\": true, \"order\": \"desc\"}}]}, \"aggs\": [], \"title\": \"Node Filter [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "8c173130-bac3-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [
+                {
+                    "id": "metricbeat-*", 
+                    "name": "control_0_index_pattern", 
+                    "type": "index-pattern"
+                }
+            ], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T16:37:05.074Z", 
+            "version": "WzEzNzUsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Client Error Rates [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"read\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.error\", \"type\": \"max\", \"id\": \"8674fc32-bac8-11e9-986e-1d8d9532a1f1\"}, {\"field\": \"8674fc32-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"derivative\", \"id\": \"8674fc34-bac8-11e9-986e-1d8d9532a1f1\", \"unit\": \"1s\"}, {\"field\": \"8674fc34-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"positive_only\", \"id\": \"8674fc33-bac8-11e9-986e-1d8d9532a1f1\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"8674fc31-bac8-11e9-986e-1d8d9532a1f1\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#DB1374\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"write\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.error\", \"type\": \"max\", \"id\": \"86752341-bac8-11e9-986e-1d8d9532a1f1\"}, {\"field\": \"86752341-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"derivative\", \"id\": \"86752343-bac8-11e9-986e-1d8d9532a1f1\", \"unit\": \"1s\"}, {\"field\": \"86752343-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"positive_only\", \"id\": \"86752342-bac8-11e9-986e-1d8d9532a1f1\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"86752340-bac8-11e9-986e-1d8d9532a1f1\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#00B3A4\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"delete\", \"metrics\": [{\"field\": \"aerospike.namespace.client.delete.error\", \"type\": \"max\", \"id\": \"86752345-bac8-11e9-986e-1d8d9532a1f1\"}, {\"field\": \"86752345-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"derivative\", \"id\": \"86752347-bac8-11e9-986e-1d8d9532a1f1\", \"unit\": \"1s\"}, {\"field\": \"86752347-bac8-11e9-986e-1d8d9532a1f1\", \"type\": \"positive_only\", \"id\": \"86752346-bac8-11e9-986e-1d8d9532a1f1\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"86752344-bac8-11e9-986e-1d8d9532a1f1\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"8674fc30-bac8-11e9-986e-1d8d9532a1f1\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Client Error Rates [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "b5121f00-bac8-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:11:20.560Z", 
+            "version": "WzEzODIsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Client Success Rates [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"read\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.success\", \"type\": \"max\", \"id\": \"3b633122-bac9-11e9-9a9a-2f5e8f21d503\"}, {\"field\": \"3b633122-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"derivative\", \"id\": \"3b633124-bac9-11e9-9a9a-2f5e8f21d503\", \"unit\": \"1s\"}, {\"field\": \"3b633124-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"positive_only\", \"id\": \"3b633123-bac9-11e9-9a9a-2f5e8f21d503\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"3b633121-bac9-11e9-9a9a-2f5e8f21d503\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#DB1374\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"write\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.success\", \"type\": \"max\", \"id\": \"3b633126-bac9-11e9-9a9a-2f5e8f21d503\"}, {\"field\": \"3b633126-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"derivative\", \"id\": \"3b633128-bac9-11e9-9a9a-2f5e8f21d503\", \"unit\": \"1s\"}, {\"field\": \"3b633128-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"positive_only\", \"id\": \"3b633127-bac9-11e9-9a9a-2f5e8f21d503\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"3b633125-bac9-11e9-9a9a-2f5e8f21d503\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#00B3A4\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"delete\", \"metrics\": [{\"field\": \"aerospike.namespace.client.delete.success\", \"type\": \"max\", \"id\": \"3b63312a-bac9-11e9-9a9a-2f5e8f21d503\"}, {\"field\": \"3b63312a-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"derivative\", \"id\": \"3b63312c-bac9-11e9-9a9a-2f5e8f21d503\", \"unit\": \"1s\"}, {\"field\": \"3b63312c-bac9-11e9-9a9a-2f5e8f21d503\", \"type\": \"positive_only\", \"id\": \"3b63312b-bac9-11e9-9a9a-2f5e8f21d503\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"3b633129-bac9-11e9-9a9a-2f5e8f21d503\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"3b633120-bac9-11e9-9a9a-2f5e8f21d503\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Client Success Rates [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "5b9bf0d0-bac9-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:15:59.965Z", 
+            "version": "WzEzODQsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Client Timeout Rates [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"read\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.timeout\", \"type\": \"max\", \"id\": \"ec962842-bac8-11e9-8c31-ed10485dacc9\"}, {\"field\": \"ec962842-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"derivative\", \"id\": \"ec962844-bac8-11e9-8c31-ed10485dacc9\", \"unit\": \"1s\"}, {\"field\": \"ec962844-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"positive_only\", \"id\": \"ec962843-bac8-11e9-8c31-ed10485dacc9\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"ec962841-bac8-11e9-8c31-ed10485dacc9\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#DB1374\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"write\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.timeout\", \"type\": \"max\", \"id\": \"ec964f50-bac8-11e9-8c31-ed10485dacc9\"}, {\"field\": \"ec964f50-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"derivative\", \"id\": \"ec964f52-bac8-11e9-8c31-ed10485dacc9\", \"unit\": \"1s\"}, {\"field\": \"ec964f52-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"positive_only\", \"id\": \"ec964f51-bac8-11e9-8c31-ed10485dacc9\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"ec962845-bac8-11e9-8c31-ed10485dacc9\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#00B3A4\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"delete\", \"metrics\": [{\"field\": \"aerospike.namespace.client.delete.timeout\", \"type\": \"max\", \"id\": \"ec964f54-bac8-11e9-8c31-ed10485dacc9\"}, {\"field\": \"ec964f54-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"derivative\", \"id\": \"ec964f56-bac8-11e9-8c31-ed10485dacc9\", \"unit\": \"1s\"}, {\"field\": \"ec964f56-bac8-11e9-8c31-ed10485dacc9\", \"type\": \"positive_only\", \"id\": \"ec964f55-bac8-11e9-8c31-ed10485dacc9\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"ec964f53-bac8-11e9-8c31-ed10485dacc9\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"ec962840-bac8-11e9-8c31-ed10485dacc9\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Client Timeout Rates [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "23758d10-bac9-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:14:25.761Z", 
+            "version": "WzEzODMsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Disk Space [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": 2, \"point_size\": 0, \"color\": \"rgba(211,49,21,1)\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"Total\", \"metrics\": [{\"field\": \"aerospike.namespace.device.total.bytes\", \"type\": \"max\", \"id\": \"8f321e12-bac9-11e9-a715-c7f36757ae84\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"bytes\", \"id\": \"8f321e11-bac9-11e9-a715-c7f36757ae84\", \"fill\": 0}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"rgba(22,165,165,1)\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"Used\", \"metrics\": [{\"field\": \"aerospike.namespace.device.used.bytes\", \"type\": \"max\", \"id\": \"8f321e14-bac9-11e9-a715-c7f36757ae84\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"bytes\", \"id\": \"8f321e13-bac9-11e9-a715-c7f36757ae84\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"8f321e10-bac9-11e9-a715-c7f36757ae84\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Disk Space [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "bd767280-bac9-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:18:44.136Z", 
+            "version": "WzEzODUsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Number of Objects [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"gauge_color_rules\": [{\"id\": \"6a3d4070-baca-11e9-a6e8-09b17988a9ca\"}], \"background_color_rules\": [{\"background_color\": null, \"id\": \"689053c0-baca-11e9-a6e8-09b17988a9ca\", \"value\": 0}], \"time_field\": \"@timestamp\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": 2, \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"objects\", \"metrics\": [{\"field\": \"aerospike.namespace.objects.total\", \"type\": \"max\", \"id\": \"63159632-baca-11e9-b44b-b5d06880c15a\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"63159631-baca-11e9-b44b-b5d06880c15a\", \"fill\": 0}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"63159630-baca-11e9-b44b-b5d06880c15a\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"gauge_inner_width\": 10, \"show_legend\": 1, \"show_grid\": 1, \"gauge_style\": \"half\", \"axis_scale\": \"normal\", \"gauge_width\": 10, \"type\": \"metric\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Number of Objects [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "9ce7ae20-baca-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T19:13:27.933Z", 
+            "version": "WzE0MTMsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Client Write Rates [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"success\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.success\", \"type\": \"max\", \"id\": \"0316eb52-bac8-11e9-a2f5-271fa90cc176\"}, {\"field\": \"0316eb52-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"derivative\", \"id\": \"0316eb54-bac8-11e9-a2f5-271fa90cc176\", \"unit\": \"1s\"}, {\"field\": \"0316eb54-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"positive_only\", \"id\": \"0316eb53-bac8-11e9-a2f5-271fa90cc176\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"0316eb51-bac8-11e9-a2f5-271fa90cc176\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#DB1374\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"error\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.error\", \"type\": \"max\", \"id\": \"0316eb56-bac8-11e9-a2f5-271fa90cc176\"}, {\"field\": \"0316eb56-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"derivative\", \"id\": \"0316eb58-bac8-11e9-a2f5-271fa90cc176\", \"unit\": \"1s\"}, {\"field\": \"0316eb58-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"positive_only\", \"id\": \"0316eb57-bac8-11e9-a2f5-271fa90cc176\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"0316eb55-bac8-11e9-a2f5-271fa90cc176\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#00B3A4\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"timeout\", \"metrics\": [{\"field\": \"aerospike.namespace.client.write.timeout\", \"type\": \"max\", \"id\": \"0316eb5a-bac8-11e9-a2f5-271fa90cc176\"}, {\"field\": \"0316eb5a-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"derivative\", \"id\": \"0316eb5c-bac8-11e9-a2f5-271fa90cc176\", \"unit\": \"1s\"}, {\"field\": \"0316eb5c-bac8-11e9-a2f5-271fa90cc176\", \"type\": \"positive_only\", \"id\": \"0316eb5b-bac8-11e9-a2f5-271fa90cc176\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"0316eb59-bac8-11e9-a2f5-271fa90cc176\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"0316eb50-bac8-11e9-a2f5-271fa90cc176\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Client Write Rates [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "3586e810-bac8-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:07:46.577Z", 
+            "version": "WzEzODAsMV0="
+        }, 
+        {
+            "attributes": {
+                "description": "", 
+                "kibanaSavedObjectMeta": {
+                    "searchSourceJSON": "{\"filter\": [], \"query\": {\"query\": \"\", \"language\": \"kuery\"}}"
+                }, 
+                "title": "Client Read Rates [Metricbeat Aerospike] ECS", 
+                "uiStateJSON": "{}", 
+                "version": 1, 
+                "visState": "{\"type\": \"metrics\", \"params\": {\"default_index_pattern\": \"metricbeat-*\", \"index_pattern\": \"metricbeat-*\", \"default_timefield\": \"@timestamp\", \"series\": [{\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#3185FC\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"success\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.success\", \"type\": \"max\", \"id\": \"98667322-bac7-11e9-9324-49d4f7fb9626\"}, {\"field\": \"98667322-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"derivative\", \"id\": \"98667324-bac7-11e9-9324-49d4f7fb9626\", \"unit\": \"1s\"}, {\"field\": \"98667324-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"positive_only\", \"id\": \"98667323-bac7-11e9-9324-49d4f7fb9626\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"98667321-bac7-11e9-9324-49d4f7fb9626\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#DB1374\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"error\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.error\", \"type\": \"max\", \"id\": \"98667326-bac7-11e9-9324-49d4f7fb9626\"}, {\"field\": \"98667326-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"derivative\", \"id\": \"98667328-bac7-11e9-9324-49d4f7fb9626\", \"unit\": \"1s\"}, {\"field\": \"98667328-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"positive_only\", \"id\": \"98667327-bac7-11e9-9324-49d4f7fb9626\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"98667325-bac7-11e9-9324-49d4f7fb9626\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#00B3A4\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"not_found\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.not_found\", \"type\": \"max\", \"id\": \"9866732a-bac7-11e9-9324-49d4f7fb9626\"}, {\"field\": \"9866732a-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"derivative\", \"id\": \"9866732c-bac7-11e9-9324-49d4f7fb9626\", \"unit\": \"1s\"}, {\"field\": \"9866732c-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"positive_only\", \"id\": \"9866732b-bac7-11e9-9324-49d4f7fb9626\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"98667329-bac7-11e9-9324-49d4f7fb9626\", \"fill\": \"0.2\"}, {\"line_width\": \"1\", \"point_size\": 0, \"color\": \"#490092\", \"stacked\": \"none\", \"value_template\": \"{{value}}\", \"label\": \"timeout\", \"metrics\": [{\"field\": \"aerospike.namespace.client.read.timeout\", \"type\": \"max\", \"id\": \"9866732e-bac7-11e9-9324-49d4f7fb9626\"}, {\"field\": \"9866732e-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"derivative\", \"id\": \"98667330-bac7-11e9-9324-49d4f7fb9626\", \"unit\": \"1s\"}, {\"field\": \"98667330-bac7-11e9-9324-49d4f7fb9626\", \"type\": \"positive_only\", \"id\": \"9866732f-bac7-11e9-9324-49d4f7fb9626\"}], \"split_mode\": \"everything\", \"chart_type\": \"line\", \"separate_axis\": 0, \"axis_position\": \"right\", \"formatter\": \"number\", \"id\": \"9866732d-bac7-11e9-9324-49d4f7fb9626\", \"fill\": \"0.2\"}], \"axis_formatter\": \"number\", \"interval\": \"auto\", \"id\": \"98667320-bac7-11e9-9324-49d4f7fb9626\", \"filter\": {\"query\": \"\", \"language\": \"kuery\"}, \"time_field\": \"@timestamp\", \"show_legend\": 1, \"show_grid\": 1, \"axis_scale\": \"normal\", \"type\": \"timeseries\", \"axis_position\": \"left\"}, \"aggs\": [], \"title\": \"Client Read Rates [Metricbeat Aerospike] ECS\"}"
+            }, 
+            "id": "eae846a0-bac7-11e9-a579-f5c0a5d81340", 
+            "migrationVersion": {
+                "visualization": "7.3.0"
+            }, 
+            "references": [], 
+            "type": "visualization", 
+            "updated_at": "2019-08-09T17:05:41.386Z", 
+            "version": "WzEzNzksMV0="
+        }
+    ], 
+    "version": "7.3.0"
+}
