@@ -1,0 +1,65 @@
+<div class="w3-content app-card">
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-server"></i> Probe Settings</h3>
+    </header>
+    <div class="w3-container">
+      <p>
+	<label class="w3-text-indigo">Probe IP</label>
+	<input id="ipInput" class="w3-input" type="text" value="{{ ip }}" oninput="onIpInputEdited(this)">
+      </p>
+      <p>
+	<button id="probeSaveBtn" class="w3-btn w3-disabled w3-indigo" onclick="save_settings()">Save</button>
+      </p>
+    </div>
+  </div>
+
+  <br/>
+
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-users"></i> ACL Settings</h3>
+    </header>
+    <div class="w3-container">
+      <br/>
+      <table id="aclTable" class="w3-table w3-hoverable w3-content">
+	<tbody>
+	  <tr>
+	    <td>Send ACL info</td>
+	    <td class="w3-center">
+	      <i class="fa w3-xlarge {% if acl_enabled %}fa-toggle-on w3-text-indigo{% else %}fa-toggle-off w3-text-grey{% endif %}"></i>
+	    </td>
+	  </tr>
+	</tbody>
+      </table>
+      <script>
+	function update_aclTable(data) {
+	    $('#ProbeTab').html(data);
+	}
+
+	$("#aclTable>tbody>tr").click(function(){
+	    $.post('/acl_toggle', {}, update_aclTable);
+	});
+      </script>
+      <br/>
+    </div>
+  </div>
+
+  <br/>
+
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-shield-alt"></i> Antivirus</h3>
+    </header>
+    <div class="w3-container">
+      <p>
+	<label class="w3-text-indigo">License Key</label>
+	<input id="licensekeyInput" class="w3-input" type="text" value="{{ licensekey }}" oninput="onLicensekeyInputEdited(this)">
+      </p>
+      <p>
+	<button id="installAntivirusBtn" class="w3-btn w3-disabled w3-indigo" onclick="install_antivirus()">Install</button>
+      </p>
+    </div>
+  </div>
+
+</div>

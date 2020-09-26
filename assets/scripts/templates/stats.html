@@ -1,0 +1,26 @@
+<table id="StatsTable" class="w3-table w3-bordered">
+  <thead>
+    <tr class="w3-indigo">
+      <th>Service</th>
+      <th class="w3-center">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for name, st in services.items() %}
+    <tr>
+      <td>{{ name }}</td>
+      <td class="w3-center">
+	<i class="fa w3-large w3-text-indigo {% if st == status.RUNNING %}fa-check{% elif st == status.STOPPED %}fa-times{% else %}fa-trash{% endif %}"></i>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Agent Log:</h3>
+
+<textarea id="appLogsArea" class="app-log w3-light-grey" rows="15" readonly="">{{ agent_logs }}</textarea>
+<script>
+  var ta = $('#appLogsArea');
+  ta.scrollTop(ta[0].scrollHeight);
+</script>

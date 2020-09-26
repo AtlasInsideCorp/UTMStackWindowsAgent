@@ -1,0 +1,71 @@
+<div id="addInputModal" class="w3-modal">
+  <div class="w3-modal-content app-card">
+    <header class="w3-container w3-indigo">
+      <h3>Add Custom Logs</h3>
+    </header>
+    <div class="w3-container">
+      <p>
+	<label class="w3-text-indigo">Path</label>
+	<input id="fbPathInput" class="w3-input" type="text" value="" oninput="onFbInputEdited()">
+      </p>
+      <p>
+	<label class="w3-text-indigo">Log Name</label>
+	<input id="fbFieldInput" class="w3-input" type="text" value="" oninput="onFbInputEdited()">
+      </p>
+    </div>
+    <footer class="w3-container w3-light-grey w3-padding">
+      <button id="fbSaveBtn" class="w3-btn w3-disabled w3-indigo w3-left" onclick="add_input()">Save</button>
+      <button class="w3-btn w3-white w3-right" onclick="$('#addInputModal').hide();">Cancel</button>
+    </footer>
+  </div>
+</div>
+
+<div class="w3-content" style="max-width:600px;">
+  {% if fbinputs_error == 1 %}
+  <div class="w3-container w3-red w3-card-2" style="margin-bottom:15px">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    <h3>Error</h3>
+    <p>Can't add log, already exists a log with the same path.</p>
+  </div>
+  {% endif %}
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-file-alt"></i> Custom Logs</h3>
+    </header>
+    <div class="w3-container">
+      <br/>
+      {% if fb_inputs %}
+      <table id="fbInputsTable" class="w3-table w3-bordered" style="table-layout: fixed; width: 100%; word-wrap: break-word;">
+	<thead>
+	  <tr class="w3-indigo">
+	    <th>Path</th>
+	    <th class="w3-center">Field</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  {% for path, field in fb_inputs %}
+	  <tr class="w3-tooltip">
+	    <td>{{ path }}</td>
+	    <td class="w3-center"><span>{{ field }}</span><i class="fa fa-trash w3-large w3-right w3-text w3-text-indigo"></i></td>
+	  </tr>
+	  {% endfor %}
+	</tbody>
+      </table>
+      <script>
+	$("#fbInputsTable>tbody>tr").each(function(){
+	    $(this.children[1].children[1]).click(function(){
+		var tr = $(this).parent().parent();
+		var path = $(tr.children()[0]).text();
+		$.post('/filebeat_del_input', {path: path}, update_inputsTable);
+	    });
+	});
+      </script>
+      {% else %}
+      You don't have custom logs yet, use the button below to add some.
+      {% endif %}
+      <p>
+	<button class="w3-btn w3-indigo" onclick="$('#addInputModal').show()">Add</button>
+      </p>
+    </div>
+  </div>
+</div>

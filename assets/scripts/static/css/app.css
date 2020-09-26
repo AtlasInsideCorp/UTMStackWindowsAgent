@@ -1,0 +1,21 @@
+*:focus {
+    outline: none;
+}
+
+#bannerImg {
+    max-height: 50px;
+}
+
+#AppNavBar {
+    margin-top: 10px;
+}
+
+.app-card {
+    max-width: 500px;
+}
+
+.app-log {
+    width: 100%;
+    font-family: monospace,monospace;
+    font-size:0.8em;
+}

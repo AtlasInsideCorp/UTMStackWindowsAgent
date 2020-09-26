@@ -1,0 +1,29 @@
+<div class="w3-content" style="max-width:600px;">
+  {% if ps_old %}
+  <div class="w3-container w3-red w3-text-white w3-card-2" style="margin-bottom:15px">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    <h3>Error!</h3>
+    <p>Powershell version in this machine is too old, version 5, or superior, is needed for this program to work correctly.</p>
+  </div>
+  {% endif %}
+
+  {% if winlog_small %}
+  <div class="w3-container w3-orange w3-text-white w3-card-2" style="margin-bottom:15px">
+    <span onclick="this.parentElement.style.display='none'" class="w3-closebtn">×</span>
+    <h3>Warning!</h3>
+    <p>Windows logs maximum size is too small. The recommended minimum is 200MB.</p>
+  </div>
+  {% endif %}
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-heartbeat"></i> Status <a id="app-SyncButt" class="w3-right" href="#" onclick="update_stats()"><i class="fa fa-sync"></i></a></h3>
+    </header>
+    <div class="w3-container">
+      <br/>
+      <div id="fbStatsContainer">
+	{% include 'stats.html' %}
+      </div>
+      <br/>
+    </div>
+  </div>
+</div>

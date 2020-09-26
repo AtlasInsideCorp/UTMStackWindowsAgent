@@ -1,0 +1,29 @@
+<div class="w3-content app-card">
+  <div class="w3-card-4">
+    <header class="w3-container w3-indigo">
+      <h3><i class="fa fa-puzzle-piece"></i> Modules</h3>
+    </header>
+    <div class="w3-container">
+      <br/>
+      <table id="mbModulesTable" class="w3-table w3-bordered w3-hoverable w3-content">
+	<tbody>
+	  {% for name, enabled in mb_modules %}
+	  <tr>
+	    <td>{{ name }}</td>
+	    <td class="w3-center">
+	      <i class="fa w3-xlarge {% if enabled %}fa-toggle-on w3-text-indigo{% else %}fa-toggle-off w3-text-grey{% endif %}"></i>
+	    </td>
+	  </tr>
+	  {% endfor %}
+	</tbody>
+      </table>
+      <script>
+	$("#mbModulesTable>tbody>tr").click(function(){
+	    var module = $(this.children[0]).text();
+	    $.post('/metricbeat_toggle_module', {module: module}, update_mbModulesTable);
+	});
+      </script>
+      <br/>
+    </div>
+  </div>
+</div>
