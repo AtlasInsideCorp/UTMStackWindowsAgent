@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.c
+
+# Distribution / packaging
+*.egg-info/
+*.egg
+build/
+
+# mypy
+.mypy_cache/
+.vscode/settings.json
+
+# emacs
+*~
+zephyr/geoip/asn.tar.gz
+zephyr/geoip/city.tar.gz
+zephyr/geoip/GeoLite2-ASN.mmdb
+zephyr/geoip/GeoLite2-City.mmdb
+*/.vscode/settings.json
+windows_agent/dist/*
+logan/logan/.vscode/settings.json
