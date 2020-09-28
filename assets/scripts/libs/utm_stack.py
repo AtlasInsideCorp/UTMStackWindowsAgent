@@ -8,7 +8,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
 
-__version__ = '4.0.0'
+__version__ = '5.5.0'
 APP_NAME = 'UTM Stack'
 
 
