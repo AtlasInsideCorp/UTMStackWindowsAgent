@@ -54,17 +54,8 @@ def index() -> str:
 
 
 @server.route('/update_settings', methods=['POST'])
-def update_settings() -> str:
-    ip = request.form['ip']
-    cfg.set_ip(ip)
-    logger.info(f'Server IP updated to: {ip}')
-    update_winlogbeat(ip)
-    update_filebeat(ip)
-    update_metricbeat(ip)
-    cfg.set_pcs_time(0)
-    cfg.set_swl_time(0)
-    cfg.set_acls_time(0)
-    cfg.set_agent_id('')  # Force to register agent again
+def _update_settings() -> str:
+    update_settings(request.form['ip'])
     return "OK"
 
 
@@ -187,8 +178,15 @@ def acl_toggle() -> str:
 
 
 @server.route('/install_antivirus', methods=['POST'])
-def install_antivirus() -> str:
-    lkey: str = 'GUILIC=' + request.form['licensekey']
+def _install_antivirus() -> str:
+    install_antivirus(request.form['licensekey'])
+    return 'OK'
+
+# =================================
+
+
+def install_antivirus(licensekey: str) -> None:
+    licensekey = 'GUILIC=' + licensekey
     installer = os.path.join(cfg.app_dir, 'wsasme.msi')
     logger.info('Installing antivirus')
     try:
@@ -196,15 +194,23 @@ def install_antivirus() -> str:
             run_cmd(('msiexec', '/uninstall', installer, '/qn'))
         except CalledProcessError:
             pass
-        run_cmd(('msiexec', '/i', installer, lkey,
+        run_cmd(('msiexec', '/i', installer, licensekey,
                  'CMDLINE=SME,quiet', '/qn'))
         logger.info('Antivirus installed')
     except CalledProcessError as ex:
         logger.error('Failed to install antivirus: %s', ex.stdout)
 
-    return 'Ok'
 
-# =================================
+def update_settings(ip: str) -> None:
+    cfg.set_ip(ip)
+    logger.info(f'Server IP updated to: {ip}')
+    update_winlogbeat(ip)
+    update_filebeat(ip)
+    update_metricbeat(ip)
+    cfg.set_pcs_time(0)
+    cfg.set_swl_time(0)
+    cfg.set_acls_time(0)
+    cfg.set_agent_id('')  # Force to register agent again
 
 
 def nssm(cmd: str, name: str) -> Optional[str]:

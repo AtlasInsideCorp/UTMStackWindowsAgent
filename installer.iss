@@ -6,7 +6,9 @@
 #define MetricbeatService "metricbeat"
 #define WinlogbeatService "winlogbeat"
 #define UTMSService "utmstack"
-#define AppLauncher "-m utm_agent"
+#define AppLauncher "-m utm_agent --gui"
+#define AppReset "-m utm_agent --reset"
+#define AppService "-m utm_agent.service"
 #define PyExe "Python37\pythonw.exe"
 #define PyCli "Python37\python.exe"
 #define AppIcon "app.ico"
@@ -72,7 +74,7 @@ Filename: "{sys}\sc.exe"; StatusMsg: "Installing Winlogbeat service..."; Paramet
 Filename: "{sys}\msiexec.exe"; Parameters: "/package ""{tmp}\wazuh-agent-3.11.3-1.msi"" /qn"; StatusMsg: "Installing HIDS..."; Flags: runhidden
 
 ; Install UTMS service:
-Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "install {#UTMSService} ""{app}\{#PyCli}"" -m utm_agent.service" ; Flags: runhidden
+Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "install {#UTMSService} ""{app}\{#PyCli}"" {#AppService}" ; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppDirectory ""{app}\scripts"""; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} DisplayName UTMStack"; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppExit Default Restart"; Flags: runhidden
@@ -89,7 +91,7 @@ Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLaunc
 Filename: "{sys}\sc.exe"; Parameters: "stop {#UTMSService}"; Flags: runhidden
 Filename: "{sys}\sc.exe"; Parameters: "delete {#UTMSService}"; Flags: runhidden
 ; Clear configuration:
-Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "-m utm_agent.uninstall"; Flags: runhidden
+Filename: "{app}\{#PyCli}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppReset}"; Flags: runhidden
 
 ; Stop and delete Filebeat service:
 Filename: "{sys}\sc.exe"; Parameters: "stop {#FilebeatService}"; Flags: runhidden
