@@ -1,21 +1,15 @@
 # -*- coding: utf-8 -*-
-from enum import IntEnum
-import sqlite3
+import logging.handlers
 import os
-import sys
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, ROOT)
-
-
-__version__ = '5.5.0'
-APP_NAME = 'UTM Stack'
+import sqlite3
+import subprocess
+from enum import IntEnum
 
 
 class Command(IntEnum):
     SHUTDOWN_SERVER = 1    # 1. shutdown server
     DISABLE_USER = 2       # 2. kick out and disable user
-    BLOCK_IP = 3           # 3. block ip and disconnect any traffic from IP -- it is possible to specify ranges using CIDR notation here.
+    BLOCK_IP = 3           # 3. block ip and disconnect any traffic from IP
     ISOLATE_HOST = 4       # 4. Isolate host (disconnect from network)
     RESTART_SERVER = 5     # 5. restart server
     KILL_PROCESS = 6       # 6. kill process
@@ -31,7 +25,8 @@ class ServiceStatus(IntEnum):
 
 class ConfigMan():
     def __init__(self) -> None:
-        self.app_dir = os.path.dirname(os.path.dirname(ROOT))
+        self.app_dir = os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))))
         self.filebeat_dir = os.path.join(self.app_dir, 'Filebeat')
         self.metricbeat_dir = os.path.join(self.app_dir, 'Metricbeat')
         self.winlogbeat_dir = os.path.join(self.app_dir, 'Winlogbeat')
@@ -188,3 +183,42 @@ class ConfigDB:
             self._db.execute('DROP TABLE config')
             self._db.execute('DROP TABLE filebeat_inputs')
             self._db.execute('DROP TABLE jobs')
+
+
+def get_logger(name: str) -> logging.Logger:
+    logdir = r'C:\ProgramData\UTMStack\logs'
+
+    if not os.path.exists(logdir):
+        os.makedirs(logdir)
+
+    logger = logging.Logger(name)
+    logger.parent = None  # type: ignore
+    formatter = logging.Formatter(
+        '%(asctime)s %(levelname)s: %(message)s')
+
+    chandler = logging.StreamHandler()
+    chandler.setLevel(logging.DEBUG)
+    chandler.setFormatter(formatter)
+    logger.addHandler(chandler)
+
+    log_path = os.path.join(logdir, 'log-{}.txt'.format(name))
+    fhandler = logging.handlers.RotatingFileHandler(
+        log_path, backupCount=3, maxBytes=2000000)
+    fhandler.setLevel(logging.INFO)
+    fhandler.setFormatter(formatter)
+    logger.addHandler(fhandler)
+    logger.log_path = log_path  # type: ignore
+
+    return logger
+
+
+def run_cmd(cmd: tuple, **kwargs) -> str:
+    kwargs['stdout'] = subprocess.PIPE
+    kwargs['stderr'] = subprocess.STDOUT
+    kwargs['text'] = True
+    kwargs['check'] = True
+    return subprocess.run(cmd, **kwargs).stdout
+
+
+def ps(cmd: str) -> str:
+    return run_cmd(('powershell', '-NoProfile', '-Command', cmd))
