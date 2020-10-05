@@ -13,6 +13,7 @@
 #define PyCli "Python37\python.exe"
 #define AppIcon "app.ico"
 
+
 [Setup]
 ArchitecturesInstallIn64BitMode="x64 arm64"
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -37,6 +38,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 LicenseFile=LICENSE
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -108,6 +110,7 @@ Filename: "{sys}\sc.exe"; Parameters: "delete {#WinlogbeatService}"; Flags: runh
 ; Uninstall Wazuh:
 Filename: "{sys}\msiexec.exe"; Parameters: "/x {{800017F9-14E5-4B3E-ADFC-AA77BBC53631} /qn"; Flags: runhidden
 
+
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\Filebeat"
 Type: filesandordirs; Name: "{app}\Metricbeat"
@@ -115,3 +118,41 @@ Type: filesandordirs; Name: "{app}\Winlogbeat"
 Type: filesandordirs; Name: "{app}\Python37"
 Type: filesandordirs; Name: "{app}\scripts"
 Type: files; Name: "{app}\appdata.db"
+
+
+[Code]
+procedureprocedure CurStepChanged(CurStep: TSetupStep);
+var
+  Arg: String;
+  Args: String;
+  ResultCode: Integer;
+  Configurate: Boolean;
+begin
+  if CurStep = ssPostInstall then begin
+     Configurate := False;
+     Args := ExpandConstant('{app}\scripts\run.py');
+
+     Arg := ExpandConstant('{param:host}');
+     if Arg <> '' then begin
+        Args := Args + ' --host ' + Arg;
+	Configurate := True;
+     end;
+
+     Arg := ExpandConstant('{param:acl}');
+     if Arg <> '' then begin
+        Args := Args + ' --acl ' + Arg;
+	Configurate := True;
+     end;
+
+     Arg := ExpandConstant('{param:antivirus}');
+     if Arg <> '' then begin
+        Args := Args + ' --antivirus ' + Arg;
+	Configurate := True;
+     end;
+
+     if Configurate = True then begin
+        Exec(ExpandConstant('{app}\{#PyCli}'), Args, '', SW_HIDE,
+             ewWaitUntilTerminated, ResultCode);
+     end;
+  end;
+end;
