@@ -6,10 +6,13 @@
 #define MetricbeatService "metricbeat"
 #define WinlogbeatService "winlogbeat"
 #define UTMSService "utmstack"
-#define AppLauncher "scripts\main.py"
+#define AppLauncher "-m utm_agent --gui"
+#define AppReset "-m utm_agent --reset"
+#define AppService "-m utm_agent.service"
 #define PyExe "Python37\pythonw.exe"
 #define PyCli "Python37\python.exe"
 #define AppIcon "app.ico"
+
 
 [Setup]
 ArchitecturesInstallIn64BitMode="x64 arm64"
@@ -36,6 +39,7 @@ SolidCompression=yes
 WizardStyle=modern
 LicenseFile=LICENSE
 
+
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
@@ -52,10 +56,10 @@ Source: "assets\*"; DestDir: "{app}"; Excludes: ".mypy_cache,*~,__pycache__,\waz
 
 [Icons]
 ; Start Menu launcher:
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}"; Parameters: """{app}\{#AppLauncher}"""; IconFilename: "{app}\{#AppIcon}"
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"
 
 ; Desktop launcher:
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}"; Parameters: """{app}\{#AppLauncher}"""; IconFilename: "{app}\{#AppIcon}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"; Tasks: desktopicon
 
 
 [Run]
@@ -72,7 +76,7 @@ Filename: "{sys}\sc.exe"; StatusMsg: "Installing Winlogbeat service..."; Paramet
 Filename: "{sys}\msiexec.exe"; Parameters: "/package ""{tmp}\wazuh-agent-3.11.3-1.msi"" /qn"; StatusMsg: "Installing HIDS..."; Flags: runhidden
 
 ; Install UTMS service:
-Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "install {#UTMSService} ""{app}\{#PyCli}"" service.py" ; Flags: runhidden
+Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "install {#UTMSService} ""{app}\{#PyCli}"" {#AppService}" ; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppDirectory ""{app}\scripts"""; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} DisplayName UTMStack"; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppExit Default Restart"; Flags: runhidden
@@ -81,7 +85,7 @@ Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters:
 Filename: "{app}\nssm.exe"; StatusMsg: "Starting UTMS service..."; Parameters: "start {#UTMSService}"; Flags: runhidden
 
 ; Offer to launch app after install:
-Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: """{app}\{#AppLauncher}"""; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 
 [UninstallRun]
@@ -89,7 +93,7 @@ Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: """{app}\{#
 Filename: "{sys}\sc.exe"; Parameters: "stop {#UTMSService}"; Flags: runhidden
 Filename: "{sys}\sc.exe"; Parameters: "delete {#UTMSService}"; Flags: runhidden
 ; Clear configuration:
-Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: """{app}\uninstall.py"""; Flags: runhidden
+Filename: "{app}\{#PyCli}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppReset}"; Flags: runhidden
 
 ; Stop and delete Filebeat service:
 Filename: "{sys}\sc.exe"; Parameters: "stop {#FilebeatService}"; Flags: runhidden
@@ -106,6 +110,7 @@ Filename: "{sys}\sc.exe"; Parameters: "delete {#WinlogbeatService}"; Flags: runh
 ; Uninstall Wazuh:
 Filename: "{sys}\msiexec.exe"; Parameters: "/x {{800017F9-14E5-4B3E-ADFC-AA77BBC53631} /qn"; Flags: runhidden
 
+
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\Filebeat"
 Type: filesandordirs; Name: "{app}\Metricbeat"
@@ -113,3 +118,41 @@ Type: filesandordirs; Name: "{app}\Winlogbeat"
 Type: filesandordirs; Name: "{app}\Python37"
 Type: filesandordirs; Name: "{app}\scripts"
 Type: files; Name: "{app}\appdata.db"
+
+
+[Code]
+procedureprocedure CurStepChanged(CurStep: TSetupStep);
+var
+  Arg: String;
+  Args: String;
+  ResultCode: Integer;
+  Configurate: Boolean;
+begin
+  if CurStep = ssPostInstall then begin
+     Configurate := False;
+     Args := ExpandConstant('{app}\scripts\run.py');
+
+     Arg := ExpandConstant('{param:host}');
+     if Arg <> '' then begin
+        Args := Args + ' --host ' + Arg;
+	Configurate := True;
+     end;
+
+     Arg := ExpandConstant('{param:acl}');
+     if Arg <> '' then begin
+        Args := Args + ' --acl ' + Arg;
+	Configurate := True;
+     end;
+
+     Arg := ExpandConstant('{param:antivirus}');
+     if Arg <> '' then begin
+        Args := Args + ' --antivirus ' + Arg;
+	Configurate := True;
+     end;
+
+     if Configurate = True then begin
+        Exec(ExpandConstant('{app}\{#PyCli}'), Args, '', SW_HIDE,
+             ewWaitUntilTerminated, ResultCode);
+     end;
+  end;
+end;
