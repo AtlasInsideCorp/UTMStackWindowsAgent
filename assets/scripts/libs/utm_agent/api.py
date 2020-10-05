@@ -9,7 +9,7 @@ from typing import Optional
 from flask import Flask, render_template, request
 
 from . import APP_NAME, __version__
-from .utils import ConfigMan, ServiceStatus, get_logger, run_cmd
+from .utils import ConfigMan, ServiceStatus, get_logger, get_template, run_cmd
 
 server = Flask(__name__)
 server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1  # disable caching
@@ -281,7 +281,7 @@ def get_app_log() -> str:
 
 def update_winlogbeat(ip: str) -> None:
     cfg_path = os.path.join(cfg.winlogbeat_dir, 'winlogbeat.yml')
-    data = render_template('winlogbeat.yml', ip=ip)
+    data = get_template('winlogbeat.yml').render(ip=ip)
 
     with open(cfg_path, 'w') as fd:
         fd.write(data)
@@ -296,7 +296,7 @@ def update_winlogbeat(ip: str) -> None:
 def update_filebeat(ip: str) -> None:
     inputs = cfg.get_filebeat_inputs()
     cfg_path = os.path.join(cfg.filebeat_dir, 'filebeat.yml')
-    data = render_template('filebeat.yml', ip=ip, inputs=inputs)
+    data = get_template('filebeat.yml').render(ip=ip, inputs=inputs)
 
     with open(cfg_path, 'w') as fd:
         fd.write(data)
@@ -317,7 +317,7 @@ def update_filebeat(ip: str) -> None:
 
 def update_metricbeat(ip: str) -> None:
     cfg_path = os.path.join(cfg.metricbeat_dir, 'metricbeat.yml')
-    data = render_template('metricbeat.yml', ip=ip)
+    data = get_template('metricbeat.yml').render(ip=ip)
 
     with open(cfg_path, 'w') as fd:
         fd.write(data)
@@ -342,11 +342,7 @@ def update_wazuh(ip: str, key: str) -> None:
     cfg_path = os.path.join(cfg.hids_dir, 'ossec.conf')
 
     with open(cfg_path, 'w') as fd:
-        t = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                         'templates', 'wazuh.conf')
-        with open(t) as f:
-            data = f.read().replace('{{WAZUH_IP}}', ip)
-        fd.write(data)
+        fd.write(get_template('wazuh.conf').render(ip=ip))
 
     key_path = os.path.join(cfg.hids_dir, 'client.keys')
     with open(key_path, 'w') as fd:

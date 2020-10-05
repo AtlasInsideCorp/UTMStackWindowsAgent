@@ -130,23 +130,23 @@ var
 begin
   if CurStep = ssPostInstall then begin
      Configurate := False;
-     Args := ExpandConstant('{app}\scripts\run.py');
+     Args := ExpandConstant('"{app}\scripts\run.py"');
 
      Arg := ExpandConstant('{param:host}');
      if Arg <> '' then begin
-        Args := Args + ' --host ' + Arg;
+        Args := Args + ' --host=' + Arg;
 	Configurate := True;
      end;
 
      Arg := ExpandConstant('{param:acl}');
      if Arg <> '' then begin
-        Args := Args + ' --acl ' + Arg;
+        Args := Args + ' --acl=' + Arg;
 	Configurate := True;
      end;
 
      Arg := ExpandConstant('{param:antivirus}');
      if Arg <> '' then begin
-        Args := Args + ' --antivirus ' + Arg;
+        Args := Args + ' --antivirus=' + Arg;
 	Configurate := True;
      end;
 

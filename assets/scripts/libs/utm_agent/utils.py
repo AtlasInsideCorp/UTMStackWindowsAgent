@@ -4,6 +4,7 @@ import os
 import sqlite3
 import subprocess
 from enum import IntEnum
+from jinja2 import Template
 
 
 class Command(IntEnum):
@@ -222,3 +223,10 @@ def run_cmd(cmd: tuple, **kwargs) -> str:
 
 def ps(cmd: str) -> str:
     return run_cmd(('powershell', '-NoProfile', '-Command', cmd))
+
+
+def get_template(name: str) -> Template:
+    template_path = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), 'templates', name)
+    with open(template_path) as template_file:
+        return Template(template_file.read())
