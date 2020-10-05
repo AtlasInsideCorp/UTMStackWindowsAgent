@@ -5,7 +5,6 @@ import logging
 import os
 import socket
 import subprocess
-import sys
 import time
 import winreg
 from subprocess import CalledProcessError, TimeoutExpired
@@ -13,255 +12,17 @@ from threading import Event, Thread
 from typing import Any, Dict, List
 from zipfile import ZipFile
 
+import requests
+
 from . import __version__
 from .api import get_status
-from .api import main as run_api
+from .api import run_api
 from .api import update_wazuh
 from .utils import Command, ConfigMan, get_logger, ps, run_cmd
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(ROOT, 'libs'))
-import requests
 
 cfg = ConfigMan()
 shutdown = Event()
 logger = get_logger('service')
-
-
-def block_ip(ip, direction):
-    cmd = ('netsh', 'advfirewall', 'firewall',
-           'add', 'rule', f'name="UTMS_Block_{ip}"',
-           f'dir={direction}', 'interface=any',
-           'action=block', f'remoteip={ip}')
-    return run_cmd(cmd)
-
-
-def disable_interface(interface):
-    cmd = ('netsh', 'interface', 'set', 'interface',
-           interface, 'admin=disable')
-    return run_cmd(cmd, timeout=30)
-
-
-def list_installed_software() -> list:
-    def _get_soft(hive, flag) -> list:
-        aReg = winreg.ConnectRegistry(None, hive)
-        try:
-            rpath = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-            aKey = winreg.OpenKey(
-                aReg, rpath, 0, winreg.KEY_READ | flag)
-        except FileNotFoundError:
-            return []
-
-        software_list = []
-
-        count_subkey = winreg.QueryInfoKey(aKey)[0]
-
-        for i in range(count_subkey):
-            software = {}
-            try:
-                asubkey_name = winreg.EnumKey(aKey, i)
-                asubkey = winreg.OpenKey(aKey, asubkey_name)
-                software['name'] = winreg.QueryValueEx(
-                    asubkey, "DisplayName")[0]
-
-                try:
-                    software['version'] = winreg.QueryValueEx(
-                        asubkey, "DisplayVersion")[0]
-                except EnvironmentError:
-                    software['version'] = None
-
-                try:
-                    software['publisher'] = winreg.QueryValueEx(
-                        asubkey, "Publisher")[0]
-                except EnvironmentError:
-                    software['publisher'] = None
-
-                software_list.append(software)
-            except EnvironmentError:
-                continue
-
-        return software_list
-
-    software_list = _get_soft(winreg.HKEY_LOCAL_MACHINE,
-                              winreg.KEY_WOW64_32KEY)
-    software_list.extend(_get_soft(winreg.HKEY_LOCAL_MACHINE,
-                                   winreg.KEY_WOW64_64KEY))
-    software_list.extend(_get_soft(winreg.HKEY_CURRENT_USER, 0))
-    return software_list
-
-
-def acls_stats(users: List[dict]) -> list:
-    cmd = 'return ((Get-ACL "AD:$((Get-ADUser %s)'
-    cmd += '.distinguishedname)").access | where'
-    cmd += '{$_.identityreference -notmatch "BUILTIN|'
-    cmd += 'NT AUTHORITY|EVERYONE|CREATOR OWNER"}) |'
-    cmd += 'Out-String -width 2048'
-
-    keys = ['ActiveDirectoryRights', 'InheritanceType', 'ObjectType',
-            'InheritedObjectType', 'ObjectFlags', 'AccessControlType',
-            'IdentityReference', 'IsInherited', 'InheritanceFlags']
-
-    acls = []
-    for u in users:
-        try:
-            lines = ps(
-                cmd % (u['sAMAccountName'],)).strip().splitlines()
-            user = {}
-            user["objectSid"] = str(u["objectSid"])
-            aclGroup = []
-            acl = {}
-            for line in map(str.strip, lines):
-                if not line:
-                    continue
-                key, val = map(str.strip, line.split(' : '))
-                if key in keys:
-                    acl[key] = val
-                elif key == 'PropagationFlags':
-                    acl[key] = val
-                    aclGroup.append(acl)
-                    acl = {}
-            user["userACLs"] = aclGroup
-            acls.append(user)
-        except:
-            logger.warning(
-                'Failed to get ACL info for user %s',
-                u['sAMAccountName'])
-            continue
-    return acls
-
-
-def computer_stats() -> dict:
-    computer_data: Dict[str, Any] = dict()
-
-    # HOST
-    host_name = socket.gethostname()
-    cmd = '$ID = (new-object System.Security.Principal.NTAccount("'
-    cmd += host_name + '$"))\n'
-    t = '[System.Security.Principal.SecurityIdentifier]'
-    cmd += f'return $ID.Translate( {t} ).toString()'
-    computer_data["objectSid"] = ps(cmd).strip()
-
-    # NETWORK
-    ip_list: List[dict] = []
-    cmd = "foreach ($IF in Get-NetIPAddress) {$IF.IPAddress"
-    cmd += "+'|'+ $IF.InterfaceIndex +'|'+ $IF.PrefixLength"
-    cmd += "+'|'+ $IF.PrefixOrigin +'|'+ $IF.SuffixOrigin"
-    cmd += "+'|'+ $IF.AddressState}"
-    keys = ["IPAddress", "InterfaceIndex", "PrefixLength",
-            "PrefixOrigin", "SuffixOrigin", "AddressState"]
-    for net in ps(cmd).strip().splitlines():
-        ip_list.append(dict(zip(keys, net.split('|'))))
-    computer_data["ip_list"] = ip_list
-
-    # GROUPS
-    groups: List[dict] = []
-    out = ps(
-        'foreach($LG in Get-LocalGroup){$LG.Name'
-        '+"|"+ $LG.Description}')
-    for g in out.strip().splitlines():
-        group: Dict[str, Any] = dict(
-            zip(['Name', 'Description'], g.split("|")))
-        out = ps(
-            f'foreach($M in Get-LocalGroupMember -Name \'{group["Name"]}'
-            '\'){$M.ObjectClass +"|"+ $M.Name}')
-        members = []
-        for m in out.strip().splitlines():
-            members.append(
-                dict(zip(['ObjectClass', 'Name'], m.split("|"))))
-        group['Members'] = members
-        groups.append(group)
-    computer_data["localGroups"] = groups
-
-    # USERS
-    users: List[dict] = []
-    out = ps(
-        'foreach($U in Get-LocalUser){$U.Name +"|"+ $U.Enabled'
-        '+"|"+ $U.Description}')
-    for u in out.strip().splitlines():
-        user = dict(
-            zip(['Name', 'Enabled', 'Description'], u.split("|")))
-        if user['Name'][-1] == "$":
-            continue
-        users.append(user)
-    computer_data["localUsers"] = users
-
-    # FOLDERS
-    fsr = {
-        "1179785": "Read",
-        "1179817": "ReadAndExecute",
-        "1180063": "Read, Write",
-        "1180095": "ReadAndExecute, Write",
-        "1245631": "ReadAndExecute, Modify, Write",
-        "2032127": "FullControl",
-        "268435456": "FullControl (Sub Only)",
-        "536870912": "GENERIC_EXECUTE",
-        "1073741824": "GENERIC_WRITE",
-        "2147483648": "GENERIC_READ",
-        "-536805376": "Modify, Synchronize",
-        "-1610612736": "ReadAndExecute, Synchronize"}
-    folders = []
-    cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
-    cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
-    for drive in ps(cmd).split():
-        for f in os.scandir(drive+'\\'):
-            if f.is_file() or f.is_symlink():
-                continue
-            if f.name[0] in '.$':
-                continue
-            cmd = f'Get-Acl "{f.path}"'
-            cmd += '|Select-Object -Property Owner -ExpandProperty Access'
-            cmd += '|Out-String -width 2048'
-            folder: Dict[str, Any] = dict(folder=f.path)
-            access: List[dict] = []
-            for line in map(str.strip, ps(cmd).splitlines()):
-                if not line:
-                    continue
-                key, val = map(str.strip, line.split(' : '))
-                if key == 'Owner':
-                    folder['owner'] = val
-                    acl = dict()
-                elif key == 'FileSystemRights':
-                    if val.strip('-').isnumeric():
-                        val = fsr.get(val, val)
-                    acl[key] = val
-                else:
-                    acl[key] = val
-                if key == 'PropagationFlags':
-                    access.append(acl)
-            folder['access'] = access
-            folders.append(folder)
-    computer_data["localFolders"] = folders
-    return computer_data
-
-
-def check_winlogs_limit() -> None:
-    min_size = 209715200
-    try:
-        out = subprocess.check_output(
-            ('wevtutil', 'gl', 'Application'), text=True)
-        for line in out.splitlines():
-            line = line.strip()
-            if line.startswith('maxSize:'):
-                logsize = int(line.split(':')[-1].strip())
-                if logsize < min_size:
-                    logger.warning(
-                        f'Windows log size is smaller than {min_size}Bytes.')
-                    cfg.set_winlog_small(True)
-                else:
-                    cfg.set_winlog_small(False)
-                return
-    except (CalledProcessError, FileNotFoundError):
-        pass
-    logger.error('Failed to check Windows logs limit')
-
-
-def check_ps_version() -> None:
-    cmd = '$host.version'
-    cmd += '|Format-Table -Property Major -HideTableHeaders'
-    try:
-        cfg.set_ps_old(int(ps(cmd).strip() or 0) < 5)
-    except (CalledProcessError, FileNotFoundError):
-        cfg.set_ps_old(True)
 
 
 class AgentClient:
@@ -611,8 +372,7 @@ class AgentClient:
     def run(self) -> None:
         # Start Flask server
         logger.info('Starting GUI server.')
-        t = Thread(
-            target=run_api, args=(cfg.get_localport(),), daemon=True)
+        t = Thread(target=run_api, daemon=True)
         t.start()
 
         # Check for jobs
@@ -628,5 +388,245 @@ class AgentClient:
         shutdown.wait()
 
 
-if __name__ == '__main__':
+def block_ip(ip, direction):
+    cmd = ('netsh', 'advfirewall', 'firewall',
+           'add', 'rule', f'name="UTMS_Block_{ip}"',
+           f'dir={direction}', 'interface=any',
+           'action=block', f'remoteip={ip}')
+    return run_cmd(cmd)
+
+
+def disable_interface(interface):
+    cmd = ('netsh', 'interface', 'set', 'interface',
+           interface, 'admin=disable')
+    return run_cmd(cmd, timeout=30)
+
+
+def list_installed_software() -> list:
+    def _get_soft(hive, flag) -> list:
+        aReg = winreg.ConnectRegistry(None, hive)
+        try:
+            rpath = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+            aKey = winreg.OpenKey(
+                aReg, rpath, 0, winreg.KEY_READ | flag)
+        except FileNotFoundError:
+            return []
+
+        software_list = []
+
+        count_subkey = winreg.QueryInfoKey(aKey)[0]
+
+        for i in range(count_subkey):
+            software = {}
+            try:
+                asubkey_name = winreg.EnumKey(aKey, i)
+                asubkey = winreg.OpenKey(aKey, asubkey_name)
+                software['name'] = winreg.QueryValueEx(
+                    asubkey, "DisplayName")[0]
+
+                try:
+                    software['version'] = winreg.QueryValueEx(
+                        asubkey, "DisplayVersion")[0]
+                except EnvironmentError:
+                    software['version'] = None
+
+                try:
+                    software['publisher'] = winreg.QueryValueEx(
+                        asubkey, "Publisher")[0]
+                except EnvironmentError:
+                    software['publisher'] = None
+
+                software_list.append(software)
+            except EnvironmentError:
+                continue
+
+        return software_list
+
+    software_list = _get_soft(winreg.HKEY_LOCAL_MACHINE,
+                              winreg.KEY_WOW64_32KEY)
+    software_list.extend(_get_soft(winreg.HKEY_LOCAL_MACHINE,
+                                   winreg.KEY_WOW64_64KEY))
+    software_list.extend(_get_soft(winreg.HKEY_CURRENT_USER, 0))
+    return software_list
+
+
+def acls_stats(users: List[dict]) -> list:
+    cmd = 'return ((Get-ACL "AD:$((Get-ADUser %s)'
+    cmd += '.distinguishedname)").access | where'
+    cmd += '{$_.identityreference -notmatch "BUILTIN|'
+    cmd += 'NT AUTHORITY|EVERYONE|CREATOR OWNER"}) |'
+    cmd += 'Out-String -width 2048'
+
+    keys = ['ActiveDirectoryRights', 'InheritanceType', 'ObjectType',
+            'InheritedObjectType', 'ObjectFlags', 'AccessControlType',
+            'IdentityReference', 'IsInherited', 'InheritanceFlags']
+
+    acls = []
+    for u in users:
+        try:
+            lines = ps(
+                cmd % (u['sAMAccountName'],)).strip().splitlines()
+            user = {}
+            user["objectSid"] = str(u["objectSid"])
+            aclGroup = []
+            acl = {}
+            for line in map(str.strip, lines):
+                if not line:
+                    continue
+                key, val = map(str.strip, line.split(' : '))
+                if key in keys:
+                    acl[key] = val
+                elif key == 'PropagationFlags':
+                    acl[key] = val
+                    aclGroup.append(acl)
+                    acl = {}
+            user["userACLs"] = aclGroup
+            acls.append(user)
+        except:
+            logger.warning(
+                'Failed to get ACL info for user %s',
+                u['sAMAccountName'])
+            continue
+    return acls
+
+
+def computer_stats() -> dict:
+    computer_data: Dict[str, Any] = dict()
+
+    # HOST
+    host_name = socket.gethostname()
+    cmd = '$ID = (new-object System.Security.Principal.NTAccount("'
+    cmd += host_name + '$"))\n'
+    t = '[System.Security.Principal.SecurityIdentifier]'
+    cmd += f'return $ID.Translate( {t} ).toString()'
+    computer_data["objectSid"] = ps(cmd).strip()
+
+    # NETWORK
+    ip_list: List[dict] = []
+    cmd = "foreach ($IF in Get-NetIPAddress) {$IF.IPAddress"
+    cmd += "+'|'+ $IF.InterfaceIndex +'|'+ $IF.PrefixLength"
+    cmd += "+'|'+ $IF.PrefixOrigin +'|'+ $IF.SuffixOrigin"
+    cmd += "+'|'+ $IF.AddressState}"
+    keys = ["IPAddress", "InterfaceIndex", "PrefixLength",
+            "PrefixOrigin", "SuffixOrigin", "AddressState"]
+    for net in ps(cmd).strip().splitlines():
+        ip_list.append(dict(zip(keys, net.split('|'))))
+    computer_data["ip_list"] = ip_list
+
+    # GROUPS
+    groups: List[dict] = []
+    out = ps(
+        'foreach($LG in Get-LocalGroup){$LG.Name'
+        '+"|"+ $LG.Description}')
+    for g in out.strip().splitlines():
+        group: Dict[str, Any] = dict(
+            zip(['Name', 'Description'], g.split("|")))
+        out = ps(
+            f'foreach($M in Get-LocalGroupMember -Name \'{group["Name"]}'
+            '\'){$M.ObjectClass +"|"+ $M.Name}')
+        members = []
+        for m in out.strip().splitlines():
+            members.append(
+                dict(zip(['ObjectClass', 'Name'], m.split("|"))))
+        group['Members'] = members
+        groups.append(group)
+    computer_data["localGroups"] = groups
+
+    # USERS
+    users: List[dict] = []
+    out = ps(
+        'foreach($U in Get-LocalUser){$U.Name +"|"+ $U.Enabled'
+        '+"|"+ $U.Description}')
+    for u in out.strip().splitlines():
+        user = dict(
+            zip(['Name', 'Enabled', 'Description'], u.split("|")))
+        if user['Name'][-1] == "$":
+            continue
+        users.append(user)
+    computer_data["localUsers"] = users
+
+    # FOLDERS
+    fsr = {
+        "1179785": "Read",
+        "1179817": "ReadAndExecute",
+        "1180063": "Read, Write",
+        "1180095": "ReadAndExecute, Write",
+        "1245631": "ReadAndExecute, Modify, Write",
+        "2032127": "FullControl",
+        "268435456": "FullControl (Sub Only)",
+        "536870912": "GENERIC_EXECUTE",
+        "1073741824": "GENERIC_WRITE",
+        "2147483648": "GENERIC_READ",
+        "-536805376": "Modify, Synchronize",
+        "-1610612736": "ReadAndExecute, Synchronize"}
+    folders = []
+    cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
+    cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
+    for drive in ps(cmd).split():
+        for f in os.scandir(drive+'\\'):
+            if f.is_file() or f.is_symlink():
+                continue
+            if f.name[0] in '.$':
+                continue
+            cmd = f'Get-Acl "{f.path}"'
+            cmd += '|Select-Object -Property Owner -ExpandProperty Access'
+            cmd += '|Out-String -width 2048'
+            folder: Dict[str, Any] = dict(folder=f.path)
+            access: List[dict] = []
+            for line in map(str.strip, ps(cmd).splitlines()):
+                if not line:
+                    continue
+                key, val = map(str.strip, line.split(' : '))
+                if key == 'Owner':
+                    folder['owner'] = val
+                    acl = dict()
+                elif key == 'FileSystemRights':
+                    if val.strip('-').isnumeric():
+                        val = fsr.get(val, val)
+                    acl[key] = val
+                else:
+                    acl[key] = val
+                if key == 'PropagationFlags':
+                    access.append(acl)
+            folder['access'] = access
+            folders.append(folder)
+    computer_data["localFolders"] = folders
+    return computer_data
+
+
+def check_winlogs_limit() -> None:
+    min_size = 209715200
+    try:
+        out = subprocess.check_output(
+            ('wevtutil', 'gl', 'Application'), text=True)
+        for line in out.splitlines():
+            line = line.strip()
+            if line.startswith('maxSize:'):
+                logsize = int(line.split(':')[-1].strip())
+                if logsize < min_size:
+                    logger.warning(
+                        f'Windows log size is smaller than {min_size}Bytes.')
+                    cfg.set_winlog_small(True)
+                else:
+                    cfg.set_winlog_small(False)
+                return
+    except (CalledProcessError, FileNotFoundError):
+        pass
+    logger.error('Failed to check Windows logs limit')
+
+
+def check_ps_version() -> None:
+    cmd = '$host.version'
+    cmd += '|Format-Table -Property Major -HideTableHeaders'
+    try:
+        cfg.set_ps_old(int(ps(cmd).strip() or 0) < 5)
+    except (CalledProcessError, FileNotFoundError):
+        cfg.set_ps_old(True)
+
+
+def main():
     AgentClient().run()
+
+
+if __name__ == '__main__':
+    main()

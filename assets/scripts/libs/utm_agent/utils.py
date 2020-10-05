@@ -25,8 +25,8 @@ class ServiceStatus(IntEnum):
 
 class ConfigMan():
     def __init__(self) -> None:
-        self.app_dir = os.path.dirname(os.path.dirname(
-            os.path.dirname(os.path.abspath(__file__))))
+        self.app_dir = os.path.dirname(os.path.dirname(os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__)))))
         self.filebeat_dir = os.path.join(self.app_dir, 'Filebeat')
         self.metricbeat_dir = os.path.join(self.app_dir, 'Metricbeat')
         self.winlogbeat_dir = os.path.join(self.app_dir, 'Winlogbeat')
