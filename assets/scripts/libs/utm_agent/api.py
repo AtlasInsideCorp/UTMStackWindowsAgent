@@ -3,17 +3,15 @@ import os
 import subprocess
 import sys
 from subprocess import CalledProcessError
-from typing import Optional
 from time import sleep
+from typing import Optional
 
-from . import __version__, APP_NAME
+from flask import Flask, render_template, request
+
+from . import APP_NAME, __version__
 from .utils import ConfigMan, ServiceStatus, get_logger, run_cmd
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(os.path.dirname(ROOT), 'libs'))
-from flask import Flask, render_template, request
-
-
 server = Flask(__name__)
 server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1  # disable caching
 logger = get_logger('api')
