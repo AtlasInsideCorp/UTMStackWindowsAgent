@@ -118,8 +118,7 @@ No term or condition of this UTMStack License will be waived and no failure to c
 Nothing in this UTMStack License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
 
 ## Section 9 - Third Party Materials
-UTMStack uses materials from third party licensors.
-If you use those materials, you accept the terms expressed in their licenses for the use, modification and distribution of those third-party materials.
+UTMStack uses materials from third party licensors. If you use UTMStack, you accept the terms expressed in their licenses for the use, modification and distribution of those third-party materials.
 
 ### Third Party Materials List
 
