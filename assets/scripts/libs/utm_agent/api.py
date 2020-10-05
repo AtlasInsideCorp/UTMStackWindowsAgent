@@ -11,7 +11,6 @@ from flask import Flask, render_template, request
 from . import APP_NAME, __version__
 from .utils import ConfigMan, ServiceStatus, get_logger, run_cmd
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
 server = Flask(__name__)
 server.config['SEND_FILE_MAX_AGE_DEFAULT'] = 1  # disable caching
 logger = get_logger('api')
@@ -343,7 +342,8 @@ def update_wazuh(ip: str, key: str) -> None:
     cfg_path = os.path.join(cfg.hids_dir, 'ossec.conf')
 
     with open(cfg_path, 'w') as fd:
-        t = os.path.join(ROOT, 'templates', 'wazuh.conf')
+        t = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         'templates', 'wazuh.conf')
         with open(t) as f:
             data = f.read().replace('{{WAZUH_IP}}', ip)
         fd.write(data)
@@ -360,5 +360,5 @@ def update_wazuh(ip: str, key: str) -> None:
         logger.info('HIDS service restarted.')
 
 
-def main() -> None:
+def run_api() -> None:
     server.run(host='127.0.0.1', port=cfg.get_localport(), threaded=True)

@@ -6,9 +6,9 @@
 #define MetricbeatService "metricbeat"
 #define WinlogbeatService "winlogbeat"
 #define UTMSService "utmstack"
-#define AppLauncher "-m utm_agent --gui"
-#define AppReset "-m utm_agent --reset"
-#define AppService "-m utm_agent.service"
+#define AppLauncher "run.py --gui"
+#define AppReset "run.py --reset"
+#define AppService "service.py"
 #define PyExe "Python37\pythonw.exe"
 #define PyCli "Python37\python.exe"
 #define AppIcon "app.ico"
@@ -121,7 +121,7 @@ Type: files; Name: "{app}\appdata.db"
 
 
 [Code]
-procedureprocedure CurStepChanged(CurStep: TSetupStep);
+procedure CurStepChanged(CurStep: TSetupStep);
 var
   Arg: String;
   Args: String;

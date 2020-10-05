@@ -16,7 +16,7 @@ import requests
 
 from . import __version__
 from .api import get_status
-from .api import main as run_api
+from .api import run_api
 from .api import update_wazuh
 from .utils import Command, ConfigMan, get_logger, ps, run_cmd
 
@@ -372,8 +372,7 @@ class AgentClient:
     def run(self) -> None:
         # Start Flask server
         logger.info('Starting GUI server.')
-        t = Thread(
-            target=run_api, args=(cfg.get_localport(),), daemon=True)
+        t = Thread(target=run_api, daemon=True)
         t.start()
 
         # Check for jobs
