@@ -1,0 +1,1 @@
+There are other software in this repository licensed under other terms by their creators. In cases where there is a license file in a folder, it indicates that the content of that folder and its subfolders are under the terms of that license. Code files may also appear, containing their own licenses in comment form
