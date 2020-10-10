@@ -19,7 +19,7 @@ jobs:
         python-version: 3.7
     - name: Install Dependencies
       run: |
-        pip --disable-pip-version-check install pylama pylint pytest Cython
+        pip --disable-pip-version-check install pylama pylint isort pytest Cython
         pip --disable-pip-version-check install -r requirements.txt
     - name: Run Linter
       run: |
