@@ -1,4 +1,4 @@
-#define MyAppName "UTM Stack"
+#define MyAppName "UTMStack"
 #define MyAppVersion "5.5.0"
 #define MyAppPublisher "Atlas Inside Technology LLC"
 #define MyAppURL "http://www.utmvault.com"
@@ -30,7 +30,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableDirPage=yes
 DisableProgramGroupPage=yes
 OutputDir=dist
-OutputBaseFilename="UTM Stack Installer {#MyAppVersion}"
+OutputBaseFilename="{#MyAppName}-Installer-{#MyAppVersion}"
 SetupIconFile="branding\app.ico"
 WizardImageFile="branding\wizard.bmp"
 ;WizardImageStretch=no
