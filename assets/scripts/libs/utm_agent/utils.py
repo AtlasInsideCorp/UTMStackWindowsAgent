@@ -108,9 +108,9 @@ class ConfigMan():
         return self.db.get('wazuh_key')
 
     def add_filebeat_input(self, path: str, field: str) -> bool:
-        q = 'INSERT INTO filebeat_inputs VALUES (?,?)'
+        query = 'INSERT INTO filebeat_inputs VALUES (?,?)'
         try:
-            self.db.commit(q, (path, field))
+            self.db.commit(query, (path, field))
             return True
         except sqlite3.IntegrityError:
             return False
@@ -160,9 +160,9 @@ class ConfigDB:
             'INSERT OR REPLACE INTO config VALUES (?,?)', (key, value))
 
     def get(self, key: str) -> str:
-        r = self.execute(
+        row = self.execute(
             'SELECT * FROM config WHERE key=?', (key,)).fetchone()
-        return r['value'] if r else ''
+        return row['value'] if row else ''
 
     def close(self) -> None:
         self._db.close()

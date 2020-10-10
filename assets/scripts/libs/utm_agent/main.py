@@ -13,8 +13,8 @@ def url_ok(url: str, port: int, logger: logging.Logger) -> bool:
     try:
         conn = HTTPConnection(url, port)
         conn.request('GET', '/')
-        r = conn.getresponse()
-        return r.status == 200
+        resp = conn.getresponse()
+        return resp.status == 200
     except Exception:
         logger.exception('Server not started')
         return False

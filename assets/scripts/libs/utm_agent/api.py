@@ -258,9 +258,9 @@ def get_status() -> dict:
 def _get_modules(name) -> list:
     modules = []
     modules_dir = os.path.join(cfg.app_dir, name, 'modules.d')
-    for p in os.listdir(modules_dir):
-        t = p.split('.')
-        modules.append((t[0], t[-1] != 'disabled'))
+    for element in os.listdir(modules_dir):
+        filename = element.split('.')
+        modules.append((filename[0], filename[-1] != 'disabled'))
     modules.sort(key=lambda e: e[0])
     return modules
 
@@ -274,16 +274,16 @@ def get_metricbeat_modules() -> list:
 
 
 def get_app_log() -> str:
-    with open(logger.log_path) as fd:  # type: ignore
-        return '\n'.join(fd.read().split('\n')[-50:])
+    with open(logger.log_path) as log_file:  # type: ignore
+        return '\n'.join(log_file.read().split('\n')[-50:])
 
 
 def update_winlogbeat(ip: str) -> None:
     cfg_path = os.path.join(cfg.winlogbeat_dir, 'winlogbeat.yml')
     data = get_template('winlogbeat.yml').render(ip=ip)
 
-    with open(cfg_path, 'w') as fd:
-        fd.write(data)
+    with open(cfg_path, 'w') as file:
+        file.write(data)
     logger.info('Winlogbeat configuration updated.')
 
     if nssm('restart', 'winlogbeat') is None:
@@ -297,8 +297,8 @@ def update_filebeat(ip: str) -> None:
     cfg_path = os.path.join(cfg.filebeat_dir, 'filebeat.yml')
     data = get_template('filebeat.yml').render(ip=ip, inputs=inputs)
 
-    with open(cfg_path, 'w') as fd:
-        fd.write(data)
+    with open(cfg_path, 'w') as file:
+        file.write(data)
     logger.info('Filebeat configuration updated.')
 
     has_mod = True in [s for m, s in get_filebeat_modules()]
@@ -318,8 +318,8 @@ def update_metricbeat(ip: str) -> None:
     cfg_path = os.path.join(cfg.metricbeat_dir, 'metricbeat.yml')
     data = get_template('metricbeat.yml').render(ip=ip)
 
-    with open(cfg_path, 'w') as fd:
-        fd.write(data)
+    with open(cfg_path, 'w') as file:
+        file.write(data)
     logger.info('Metricbeat configuration updated.')
 
     has_mod = True in [s for m, s in get_metricbeat_modules()]
@@ -340,12 +340,12 @@ def update_wazuh(ip: str, key: str) -> None:
         cfg.hids_dir = os.path.dirname(cfg.app_dir)
     cfg_path = os.path.join(cfg.hids_dir, 'ossec.conf')
 
-    with open(cfg_path, 'w') as fd:
-        fd.write(get_template('wazuh.conf').render(ip=ip))
+    with open(cfg_path, 'w') as file:
+        file.write(get_template('wazuh.conf').render(ip=ip))
 
     key_path = os.path.join(cfg.hids_dir, 'client.keys')
-    with open(key_path, 'w') as fd:
-        fd.write(key)
+    with open(key_path, 'w') as file:
+        file.write(key)
 
     logger.info('HIDS configuration updated.')
 

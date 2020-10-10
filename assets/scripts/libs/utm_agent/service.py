@@ -36,14 +36,14 @@ class AgentClient:
             self.ip, self.srv_port, req)
         kwargs['agent_id'] = self.agent_id
         raw = kwargs.pop('raw', False)
-        with requests.post(url, kwargs) as r:
-            r.raise_for_status()
+        with requests.post(url, kwargs) as resp:
+            resp.raise_for_status()
             if raw:
-                return r.content
-            resp = r.json()
-            if resp['error'] == 2:  # Agent not registered
-                cfg.set_agent_id('')
-            return resp
+                return resp.content
+            response = resp.json()
+        if response['error'] == 2:  # Agent not registered
+            cfg.set_agent_id('')
+        return response
 
     def register_agent(self) -> None:
         self.agent_id = socket.gethostname()
@@ -58,8 +58,8 @@ class AgentClient:
             'get_update', agent_version=__version__, raw=True)
         cfg.set_last_check_for_updates(time.time())
         if data:
-            with io.BytesIO(data) as fd:
-                with ZipFile(fd) as zfile:
+            with io.BytesIO(data) as file:
+                with ZipFile(file) as zfile:
                     zfile.extractall(cfg.app_dir)
             shutdown.set()
 
@@ -226,18 +226,18 @@ class AgentClient:
     def run(self) -> None:
         # Start Flask server
         logger.info('Starting GUI server.')
-        t = Thread(target=run_api, daemon=True)
-        t.start()
+        thread = Thread(target=run_api, daemon=True)
+        thread.start()
 
         # Check for jobs
         logger.info('Starting tasks thread.')
-        t = Thread(target=self.start_jobs_worker, daemon=True)
-        t.start()
+        thread = Thread(target=self.start_jobs_worker, daemon=True)
+        thread.start()
 
         # Send status
         logger.info('Starting status thread.')
-        t = Thread(target=self.start_stats_worker, daemon=True)
-        t.start()
+        thread = Thread(target=self.start_stats_worker, daemon=True)
+        thread.start()
 
         shutdown.wait()
 
@@ -258,23 +258,23 @@ def disable_interface(interface):
 
 def list_installed_software() -> list:
     def _get_soft(hive, flag) -> list:
-        aReg = winreg.ConnectRegistry(None, hive)
+        a_reg = winreg.ConnectRegistry(None, hive)
         try:
             rpath = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-            aKey = winreg.OpenKey(
-                aReg, rpath, 0, winreg.KEY_READ | flag)
+            a_key = winreg.OpenKey(
+                a_reg, rpath, 0, winreg.KEY_READ | flag)
         except FileNotFoundError:
             return []
 
         software_list = []
 
-        count_subkey = winreg.QueryInfoKey(aKey)[0]
+        count_subkey = winreg.QueryInfoKey(a_key)[0]
 
         for i in range(count_subkey):
             software = {}
             try:
-                asubkey_name = winreg.EnumKey(aKey, i)
-                asubkey = winreg.OpenKey(aKey, asubkey_name)
+                asubkey_name = winreg.EnumKey(a_key, i)
+                asubkey = winreg.OpenKey(a_key, asubkey_name)
                 software['name'] = winreg.QueryValueEx(
                     asubkey, "DisplayName")[0]
 
@@ -316,13 +316,13 @@ def acls_stats(users: List[dict]) -> list:
             'IdentityReference', 'IsInherited', 'InheritanceFlags']
 
     acls = []
-    for u in users:
+    for elem in users:
         try:
             lines = ps(
-                cmd % (u['sAMAccountName'],)).strip().splitlines()
+                cmd % (elem['sAMAccountName'],)).strip().splitlines()
             user = {}
-            user["objectSid"] = str(u["objectSid"])
-            aclGroup = []
+            user["objectSid"] = str(elem["objectSid"])
+            acl_group = []
             acl = {}
             for line in map(str.strip, lines):
                 if not line:
@@ -332,14 +332,14 @@ def acls_stats(users: List[dict]) -> list:
                     acl[key] = val
                 elif key == 'PropagationFlags':
                     acl[key] = val
-                    aclGroup.append(acl)
+                    acl_group.append(acl)
                     acl = {}
-            user["userACLs"] = aclGroup
+            user["userACLs"] = acl_group
             acls.append(user)
         except Exception:
             logger.warning(
                 'Failed to get ACL info for user %s',
-                u['sAMAccountName'])
+                elem['sAMAccountName'])
             continue
     return acls
 
@@ -351,8 +351,8 @@ def computer_stats() -> dict:
     host_name = socket.gethostname()
     cmd = '$ID = (new-object System.Security.Principal.NTAccount("'
     cmd += host_name + '$"))\n'
-    t = '[System.Security.Principal.SecurityIdentifier]'
-    cmd += f'return $ID.Translate( {t} ).toString()'
+    ident = '[System.Security.Principal.SecurityIdentifier]'
+    cmd += f'return $ID.Translate( {ident} ).toString()'
     computer_data["objectSid"] = ps(cmd).strip()
 
     # NETWORK
@@ -372,16 +372,16 @@ def computer_stats() -> dict:
     out = ps(
         'foreach($LG in Get-LocalGroup){$LG.Name'
         '+"|"+ $LG.Description}')
-    for g in out.strip().splitlines():
+    for line in out.strip().splitlines():
         group: Dict[str, Any] = dict(
-            zip(['Name', 'Description'], g.split("|")))
+            zip(['Name', 'Description'], line.split("|")))
         out = ps(
             f'foreach($M in Get-LocalGroupMember -Name \'{group["Name"]}'
             '\'){$M.ObjectClass +"|"+ $M.Name}')
         members = []
-        for m in out.strip().splitlines():
+        for line in out.strip().splitlines():
             members.append(
-                dict(zip(['ObjectClass', 'Name'], m.split("|"))))
+                dict(zip(['ObjectClass', 'Name'], line.split("|"))))
         group['Members'] = members
         groups.append(group)
     computer_data["localGroups"] = groups
@@ -391,9 +391,9 @@ def computer_stats() -> dict:
     out = ps(
         'foreach($U in Get-LocalUser){$U.Name +"|"+ $U.Enabled'
         '+"|"+ $U.Description}')
-    for u in out.strip().splitlines():
+    for line in out.strip().splitlines():
         user = dict(
-            zip(['Name', 'Enabled', 'Description'], u.split("|")))
+            zip(['Name', 'Enabled', 'Description'], line.split("|")))
         if user['Name'][-1] == "$":
             continue
         users.append(user)
@@ -417,15 +417,15 @@ def computer_stats() -> dict:
     cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
     cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
     for drive in ps(cmd).split():
-        for f in os.scandir(drive+'\\'):
-            if f.is_file() or f.is_symlink():
+        for element in os.scandir(drive+'\\'):
+            if element.is_file() or element.is_symlink():
                 continue
-            if f.name[0] in '.$':
+            if element.name[0] in '.$':
                 continue
-            cmd = f'Get-Acl "{f.path}"'
+            cmd = f'Get-Acl "{element.path}"'
             cmd += '|Select-Object -Property Owner -ExpandProperty Access'
             cmd += '|Out-String -width 2048'
-            folder: Dict[str, Any] = dict(folder=f.path)
+            folder: Dict[str, Any] = dict(folder=element.path)
             access: List[dict] = []
             for line in map(str.strip, ps(cmd).splitlines()):
                 if not line:
@@ -558,10 +558,10 @@ def _run_job(cmd, params) -> dict:
     elif cmd == Command.UNINSTALL_PROGRAM:
         logger.info(
             'Received command to uninstall program: %s', params)
-        q = "description='{}'".format(params)
+        cond = "description='{}'".format(params)
         try:
             out = run_cmd(
-                ('wmic', 'product', 'where', q, 'uninstall'))
+                ('wmic', 'product', 'where', cond, 'uninstall'))
             return {'error': 0, 'output': out}
         except CalledProcessError as ex:
             logger.error(
