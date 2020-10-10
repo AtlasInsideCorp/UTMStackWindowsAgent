@@ -476,7 +476,7 @@ def acls_stats(users: List[dict]) -> list:
                     acl = {}
             user["userACLs"] = aclGroup
             acls.append(user)
-        except:
+        except Exception:
             logger.warning(
                 'Failed to get ACL info for user %s',
                 u['sAMAccountName'])

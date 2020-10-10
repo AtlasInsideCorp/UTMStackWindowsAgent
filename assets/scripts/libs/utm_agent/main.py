@@ -15,7 +15,7 @@ def url_ok(url: str, port: int, logger: logging.Logger) -> bool:
         conn.request('GET', '/')
         r = conn.getresponse()
         return r.status == 200
-    except:
+    except Exception:
         logger.exception('Server not started')
         return False
 
