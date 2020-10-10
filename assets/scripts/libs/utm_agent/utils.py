@@ -33,110 +33,110 @@ class ConfigMan():
         self.metricbeat_dir = os.path.join(self.app_dir, 'Metricbeat')
         self.winlogbeat_dir = os.path.join(self.app_dir, 'Winlogbeat')
         self.hids_dir = r'C:\Program Files (x86)\ossec-agent'
-        self.db = ConfigDB(os.path.join(self.app_dir, 'appdata.db'))
+        self.dbase = ConfigDB(os.path.join(self.app_dir, 'appdata.db'))
 
     def set_localport(self, port: int) -> None:
-        self.db.set('local_port', port)
+        self.dbase.set('local_port', port)
 
     def get_localport(self) -> int:
-        return int(self.db.get('local_port') or 23948)
+        return int(self.dbase.get('local_port') or 23948)
 
     def set_probeport(self, port: int) -> None:
-        self.db.set('probe_port', port)
+        self.dbase.set('probe_port', port)
 
     def get_probeport(self) -> int:
-        return int(self.db.get('probe_port') or 23949)
+        return int(self.dbase.get('probe_port') or 23949)
 
     def set_winlog_small(self, is_small: bool) -> None:
-        self.db.set('winlog_small', 1 if is_small else 0)
+        self.dbase.set('winlog_small', 1 if is_small else 0)
 
     def get_winlog_small(self) -> bool:
-        return self.db.get('winlog_small') == '1'
+        return self.dbase.get('winlog_small') == '1'
 
     def set_ps_old(self, is_old: bool) -> None:
-        self.db.set('ps_old', 1 if is_old else 0)
+        self.dbase.set('ps_old', 1 if is_old else 0)
 
     def get_ps_old(self) -> bool:
-        return self.db.get('ps_old') == '1'
+        return self.dbase.get('ps_old') == '1'
 
-    def set_ip(self, ip: str) -> None:
-        self.db.set('server_ip', ip)
+    def set_ip(self, ip_addr: str) -> None:
+        self.dbase.set('server_ip', ip_addr)
 
     def get_ip(self) -> str:
-        return self.db.get('server_ip')
+        return self.dbase.get('server_ip')
 
     def set_last_check_for_updates(self, timestamp: float) -> None:
-        self.db.set('last_check_for_updates', timestamp)
+        self.dbase.set('last_check_for_updates', timestamp)
 
     def get_last_check_for_updates(self) -> float:
-        return float(self.db.get('last_check_for_updates') or 0)
+        return float(self.dbase.get('last_check_for_updates') or 0)
 
     def set_pcs_time(self, timestamp: float) -> None:
-        self.db.set('pcs_last_timestamp', timestamp)
+        self.dbase.set('pcs_last_timestamp', timestamp)
 
     def get_pcs_time(self) -> float:
-        return float(self.db.get('pcs_last_timestamp') or 0)
+        return float(self.dbase.get('pcs_last_timestamp') or 0)
 
     def set_swl_time(self, timestamp: float) -> None:
-        self.db.set('swl_last_timestamp', timestamp)
+        self.dbase.set('swl_last_timestamp', timestamp)
 
     def get_swl_time(self) -> float:
-        return float(self.db.get('swl_last_timestamp') or 0)
+        return float(self.dbase.get('swl_last_timestamp') or 0)
 
     def set_acls_time(self, timestamp: float) -> None:
-        self.db.set('acls_last_timestamp', timestamp)
+        self.dbase.set('acls_last_timestamp', timestamp)
 
     def get_acls_time(self) -> float:
-        return float(self.db.get('acls_last_timestamp') or 0)
+        return float(self.dbase.get('acls_last_timestamp') or 0)
 
     def set_acl_check(self, check: bool) -> None:
-        self.db.set('acl_check', 1 if check else 0)
+        self.dbase.set('acl_check', 1 if check else 0)
 
     def get_acl_check(self) -> bool:
-        return self.db.get('acl_check') == '1'
+        return self.dbase.get('acl_check') == '1'
 
     def set_agent_id(self, agent_id: str) -> None:
-        self.db.set('agent_id', agent_id)
+        self.dbase.set('agent_id', agent_id)
 
     def get_agent_id(self) -> str:
-        return self.db.get('agent_id')
+        return self.dbase.get('agent_id')
 
     def set_wazuh_key(self, wazuh_key: str) -> None:
-        self.db.set('wazuh_key', wazuh_key)
+        self.dbase.set('wazuh_key', wazuh_key)
 
     def get_wazuh_key(self) -> str:
-        return self.db.get('wazuh_key')
+        return self.dbase.get('wazuh_key')
 
     def add_filebeat_input(self, path: str, field: str) -> bool:
         query = 'INSERT INTO filebeat_inputs VALUES (?,?)'
         try:
-            self.db.commit(query, (path, field))
+            self.dbase.commit(query, (path, field))
             return True
         except sqlite3.IntegrityError:
             return False
 
     def del_filebeat_input(self, path: str) -> None:
-        self.db.commit(
+        self.dbase.commit(
             'DELETE FROM filebeat_inputs WHERE path=?',
             (path,))
 
     def get_filebeat_inputs(self) -> list:
-        return self.db.execute(
+        return self.dbase.execute(
             'SELECT * FROM filebeat_inputs').fetchall()
 
     def add_jobs(self, jobs: list) -> None:
         for job_id, cmd_id, params in jobs:
-            self.db.commit('INSERT INTO jobs VALUES (?,?,?)',
-                           (job_id, cmd_id, params))
+            self.dbase.commit('INSERT INTO jobs VALUES (?,?,?)',
+                              (job_id, cmd_id, params))
 
     def remove_job(self, job_id: int) -> None:
-        self.db.commit('DELETE FROM jobs WHERE id=?', (job_id,))
+        self.dbase.commit('DELETE FROM jobs WHERE id=?', (job_id,))
 
     def get_jobs(self) -> list:
-        return self.db.execute('SELECT * FROM jobs').fetchall()
+        return self.dbase.execute('SELECT * FROM jobs').fetchall()
 
     def delete_data(self) -> None:
-        self.db.delete_tables()
+        self.dbase.delete_tables()
 
 
 class ConfigDB:
@@ -222,7 +222,7 @@ def run_cmd(cmd: tuple, **kwargs) -> str:
     return subprocess.run(cmd, **kwargs).stdout
 
 
-def ps(cmd: str) -> str:
+def pshell(cmd: str) -> str:
     return run_cmd(('powershell', '-NoProfile', '-Command', cmd))
 
 

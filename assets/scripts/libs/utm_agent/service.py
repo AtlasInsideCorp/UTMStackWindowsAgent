@@ -16,7 +16,7 @@ import requests
 
 from . import __version__
 from .api import get_status, run_api, update_wazuh
-from .utils import Command, ConfigMan, get_logger, ps, run_cmd
+from .utils import Command, ConfigMan, get_logger, pshell, run_cmd
 
 cfg = ConfigMan()
 shutdown = Event()
@@ -29,11 +29,11 @@ class AgentClient:
         self.stats_delay = 60*4
         self.srv_port = cfg.get_probeport()
         self.agent_id = None
-        self.ip = None
+        self.ip_addr = None
 
     def api_call(self, req: str, **kwargs):
         url = 'http://{}:{}/{}'.format(
-            self.ip, self.srv_port, req)
+            self.ip_addr, self.srv_port, req)
         kwargs['agent_id'] = self.agent_id
         raw = kwargs.pop('raw', False)
         with requests.post(url, kwargs) as resp:
@@ -51,7 +51,7 @@ class AgentClient:
         wazuh_key, self.agent_id = resp['key'], resp['agent_id']
         cfg.set_wazuh_key(wazuh_key)
         cfg.set_agent_id(self.agent_id)
-        update_wazuh(self.ip, wazuh_key)
+        update_wazuh(self.ip_addr, wazuh_key)
 
     def check_for_updates(self) -> None:
         data = self.api_call(
@@ -66,7 +66,7 @@ class AgentClient:
     def start_jobs_worker(self) -> None:
         while not shutdown.is_set():
             try:
-                if self.ip and cfg.get_agent_id():
+                if self.ip_addr and cfg.get_agent_id():
                     last_checked = cfg.get_last_check_for_updates()
                     last_checked = (time.time() - last_checked)/3600
                     if last_checked >= 1:
@@ -98,7 +98,7 @@ class AgentClient:
                             requests.HTTPError):
                         logger.info(
                             'Failed to get tasks from probe server (%s)',
-                            self.ip)
+                            self.ip_addr)
             except Exception:
                 logger.exception(
                     'Unexpected error on the tasks thread')
@@ -109,25 +109,25 @@ class AgentClient:
             _check_winlogs_limit()
             _check_ps_version()
             try:
-                self.ip = cfg.get_ip()
-                if self.ip:
+                self.ip_addr = cfg.get_ip()
+                if self.ip_addr:
                     self.agent_id = cfg.get_agent_id()
                     if not self.agent_id:
                         logging.info(
                             'Agent is not registered on probe server'
-                            ' (%s), registering now.', self.ip)
+                            ' (%s), registering now.', self.ip_addr)
                         try:
                             self.register_agent()
                             logger.info(
                                 'Agent registered on probe server: %s',
-                                self.ip)
+                                self.ip_addr)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             self.agent_id = None
                             logger.exception(
                                 'Failed to register Agent on probe server: %s',
-                                self.ip)
+                                self.ip_addr)
                             shutdown.wait(10)
                             continue
 
@@ -144,13 +144,13 @@ class AgentClient:
                         except CalledProcessError as ex:
                             logger.exception(
                                 'Failed to send computer status to server'
-                                ' %s: %s', self.ip, ex.stdout)
+                                ' %s: %s', self.ip_addr, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
                                 'Failed to send computer status to server %s',
-                                self.ip)
+                                self.ip_addr)
 
                     last_sent = cfg.get_swl_time()
                     time_elapsed = (time.time() - last_sent)/3600
@@ -166,13 +166,13 @@ class AgentClient:
                         except CalledProcessError as ex:
                             logger.exception(
                                 'Failed to send software list to server'
-                                ' %s: %s', self.ip, ex.stdout)
+                                ' %s: %s', self.ip_addr, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
                                 'Failed to send software list to server: %s',
-                                self.ip)
+                                self.ip_addr)
 
                     acl_enabled = cfg.get_acl_check()
                     last_sent = cfg.get_acls_time()
@@ -191,13 +191,13 @@ class AgentClient:
                         except CalledProcessError as ex:
                             logger.exception(
                                 'Failed to send ACLs stats to server %s: %s',
-                                self.ip, ex.stdout)
+                                self.ip_addr, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
                                 'Failed to send ACLs stats to server: %s',
-                                self.ip)
+                                self.ip_addr)
 
                     data = get_status()
                     data['agent_version'] = __version__
@@ -211,7 +211,7 @@ class AgentClient:
                             requests.HTTPError):
                         logger.exception(
                             'Failed to send agent status to probe server: %s',
-                            self.ip)
+                            self.ip_addr)
                 else:
                     logger.warning(
                         'Probe server IP not configured.')
@@ -242,11 +242,11 @@ class AgentClient:
         shutdown.wait()
 
 
-def block_ip(ip, direction):
+def block_ip(ip_addr, direction):
     cmd = ('netsh', 'advfirewall', 'firewall',
-           'add', 'rule', f'name="UTMS_Block_{ip}"',
+           'add', 'rule', f'name="UTMS_Block_{ip_addr}"',
            f'dir={direction}', 'interface=any',
-           'action=block', f'remoteip={ip}')
+           'action=block', f'remoteip={ip_addr}')
     return run_cmd(cmd)
 
 
@@ -318,7 +318,7 @@ def acls_stats(users: List[dict]) -> list:
     acls = []
     for elem in users:
         try:
-            lines = ps(
+            lines = pshell(
                 cmd % (elem['sAMAccountName'],)).strip().splitlines()
             user = {}
             user["objectSid"] = str(elem["objectSid"])
@@ -353,7 +353,7 @@ def computer_stats() -> dict:
     cmd += host_name + '$"))\n'
     ident = '[System.Security.Principal.SecurityIdentifier]'
     cmd += f'return $ID.Translate( {ident} ).toString()'
-    computer_data["objectSid"] = ps(cmd).strip()
+    computer_data["objectSid"] = pshell(cmd).strip()
 
     # NETWORK
     ip_list: List[dict] = []
@@ -363,32 +363,32 @@ def computer_stats() -> dict:
     cmd += "+'|'+ $IF.AddressState}"
     keys = ["IPAddress", "InterfaceIndex", "PrefixLength",
             "PrefixOrigin", "SuffixOrigin", "AddressState"]
-    for net in ps(cmd).strip().splitlines():
+    for net in pshell(cmd).strip().splitlines():
         ip_list.append(dict(zip(keys, net.split('|'))))
     computer_data["ip_list"] = ip_list
 
     # GROUPS
     groups: List[dict] = []
-    out = ps(
+    out = pshell(
         'foreach($LG in Get-LocalGroup){$LG.Name'
         '+"|"+ $LG.Description}')
     for line in out.strip().splitlines():
         group: Dict[str, Any] = dict(
             zip(['Name', 'Description'], line.split("|")))
-        out = ps(
+        out = pshell(
             f'foreach($M in Get-LocalGroupMember -Name \'{group["Name"]}'
             '\'){$M.ObjectClass +"|"+ $M.Name}')
         members = []
-        for line in out.strip().splitlines():
+        for elem in out.strip().splitlines():
             members.append(
-                dict(zip(['ObjectClass', 'Name'], line.split("|"))))
+                dict(zip(['ObjectClass', 'Name'], elem.split("|"))))
         group['Members'] = members
         groups.append(group)
     computer_data["localGroups"] = groups
 
     # USERS
     users: List[dict] = []
-    out = ps(
+    out = pshell(
         'foreach($U in Get-LocalUser){$U.Name +"|"+ $U.Enabled'
         '+"|"+ $U.Description}')
     for line in out.strip().splitlines():
@@ -416,7 +416,7 @@ def computer_stats() -> dict:
     folders = []
     cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
     cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
-    for drive in ps(cmd).split():
+    for drive in pshell(cmd).split():
         for element in os.scandir(drive+'\\'):
             if element.is_file() or element.is_symlink():
                 continue
@@ -427,7 +427,7 @@ def computer_stats() -> dict:
             cmd += '|Out-String -width 2048'
             folder: Dict[str, Any] = dict(folder=element.path)
             access: List[dict] = []
-            for line in map(str.strip, ps(cmd).splitlines()):
+            for line in map(str.strip, pshell(cmd).splitlines()):
                 if not line:
                     continue
                 key, val = map(str.strip, line.split(' : '))
@@ -614,7 +614,7 @@ def _check_ps_version() -> None:
     cmd = '$host.version'
     cmd += '|Format-Table -Property Major -HideTableHeaders'
     try:
-        cfg.set_ps_old(int(ps(cmd).strip() or 0) < 5)
+        cfg.set_ps_old(int(pshell(cmd).strip() or 0) < 5)
     except (CalledProcessError, FileNotFoundError):
         cfg.set_ps_old(True)
 

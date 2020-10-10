@@ -18,8 +18,8 @@ cfg = ConfigMan()
 
 
 @server.errorhandler(Exception)
-def handle_exception(e) -> None:
-    logger.exception(e)
+def handle_exception(exeption) -> None:
+    logger.exception(exeption)
 
 
 @server.after_request
@@ -198,12 +198,12 @@ def install_antivirus(licensekey: str) -> None:
         logger.error('Failed to install antivirus: %s', ex.stdout)
 
 
-def update_settings(ip: str) -> None:
-    cfg.set_ip(ip)
-    logger.info('Server IP updated to: %s', ip)
-    update_winlogbeat(ip)
-    update_filebeat(ip)
-    update_metricbeat(ip)
+def update_settings(ip_addr: str) -> None:
+    cfg.set_ip(ip_addr)
+    logger.info('Server IP updated to: %s', ip_addr)
+    update_winlogbeat(ip_addr)
+    update_filebeat(ip_addr)
+    update_metricbeat(ip_addr)
     cfg.set_pcs_time(0)
     cfg.set_swl_time(0)
     cfg.set_acls_time(0)
@@ -278,9 +278,9 @@ def get_app_log() -> str:
         return '\n'.join(log_file.read().split('\n')[-50:])
 
 
-def update_winlogbeat(ip: str) -> None:
+def update_winlogbeat(ip_addr: str) -> None:
     cfg_path = os.path.join(cfg.winlogbeat_dir, 'winlogbeat.yml')
-    data = get_template('winlogbeat.yml').render(ip=ip)
+    data = get_template('winlogbeat.yml').render(ip=ip_addr)
 
     with open(cfg_path, 'w') as file:
         file.write(data)
@@ -292,10 +292,10 @@ def update_winlogbeat(ip: str) -> None:
         logger.info('Winlogbeat service restarted.')
 
 
-def update_filebeat(ip: str) -> None:
+def update_filebeat(ip_addr: str) -> None:
     inputs = cfg.get_filebeat_inputs()
     cfg_path = os.path.join(cfg.filebeat_dir, 'filebeat.yml')
-    data = get_template('filebeat.yml').render(ip=ip, inputs=inputs)
+    data = get_template('filebeat.yml').render(ip=ip_addr, inputs=inputs)
 
     with open(cfg_path, 'w') as file:
         file.write(data)
@@ -314,9 +314,9 @@ def update_filebeat(ip: str) -> None:
             logger.info('Filebeat service restarted.')
 
 
-def update_metricbeat(ip: str) -> None:
+def update_metricbeat(ip_addr: str) -> None:
     cfg_path = os.path.join(cfg.metricbeat_dir, 'metricbeat.yml')
-    data = get_template('metricbeat.yml').render(ip=ip)
+    data = get_template('metricbeat.yml').render(ip=ip_addr)
 
     with open(cfg_path, 'w') as file:
         file.write(data)
@@ -335,13 +335,13 @@ def update_metricbeat(ip: str) -> None:
             logger.info('Metricbeat service restarted.')
 
 
-def update_wazuh(ip: str, key: str) -> None:
+def update_wazuh(ip_addr: str, key: str) -> None:
     if sys.platform == "linux":
         cfg.hids_dir = os.path.dirname(cfg.app_dir)
     cfg_path = os.path.join(cfg.hids_dir, 'ossec.conf')
 
     with open(cfg_path, 'w') as file:
-        file.write(get_template('wazuh.conf').render(ip=ip))
+        file.write(get_template('wazuh.conf').render(ip=ip_addr))
 
     key_path = os.path.join(cfg.hids_dir, 'client.keys')
     with open(key_path, 'w') as file:
