@@ -79,7 +79,7 @@ class AgentClient:
 
         elif cmd == Command.DISABLE_USER:
             logger.info(
-                f'Received command to disable user: {params}')
+                'Received command to disable user: %s', params)
             output = ''
             # logout user
             try:
@@ -88,10 +88,10 @@ class AgentClient:
                 output = run_cmd(('logoff', uid))
             except (TypeError, IndexError):
                 logger.warning(
-                    f'Failed to log off user: {params}')
+                    'Failed to log off user: %s', params)
             except CalledProcessError as ex:
                 logger.warning(
-                    f'Failed to log off user: {params}')
+                    'Failed to log off user: %s', params)
                 output = ex.stdout
             # disable user
             try:
@@ -100,14 +100,14 @@ class AgentClient:
                 return {'error': 0, 'output': output}
             except CalledProcessError as ex:
                 logger.error(
-                    f'Failed to disable user: {params}')
+                    'Failed to disable user: %s', params)
                 output += ex.stdout
                 return {'error': 1,
                         'output': output}
 
         elif cmd == Command.BLOCK_IP:
             logger.info(
-                f'Received command to block ip: {params}')
+                'Received command to block ip: %s', params)
             output = ''
             try:
                 output += block_ip(params, 'in')
@@ -115,7 +115,7 @@ class AgentClient:
                 return {'error': 0, 'output': output}
             except CalledProcessError as ex:
                 logger.error(
-                    f'Failed to block ip: {params}')
+                    'Failed to block ip: %s', params)
                 output += ex.stdout
                 return {'error': 1,
                         'output': output}
@@ -138,20 +138,18 @@ class AgentClient:
                         if hasattr(ex, 'stdout'):
                             output += ex.stdout
                         logger.error(
-                            f'Failed to disable interface: {interface}')
+                            'Failed to disable interface: %s', interface)
                 if failed:
                     return {'error': 1, 'output': output}
                 else:
                     return {'error': 0, 'output': output}
             except CalledProcessError as ex:
-                logger.error(
-                    'Failed to isolate the computer.')
+                logger.error('Failed to isolate the computer.')
                 return {'error': 1,
                         'output': ex.stdout}
 
         elif cmd == Command.RESTART_SERVER:
-            logger.info(
-                'Received command to restart the computer.')
+            logger.info('Received command to restart the computer.')
             try:
                 out = run_cmd(('shutdown', '-r', '-f', '-t', '0'))
                 return {'error': 0, 'output': out}
@@ -163,20 +161,20 @@ class AgentClient:
 
         elif cmd == Command.KILL_PROCESS:
             logger.info(
-                f'Received command to kill process: {params}')
+                'Received command to kill process: %s', params)
             try:
                 out = run_cmd(
                     ('taskkill', '/F', '/T', '/IM', params))
                 return {'error': 0, 'output': out}
             except CalledProcessError as ex:
                 logger.error(
-                    f'Failed to kill process: {params}')
+                    'Failed to kill process: %s', params)
                 return {'error': 1,
                         'output': ex.stdout}
 
         elif cmd == Command.UNINSTALL_PROGRAM:
             logger.info(
-                f'Received command to uninstall program: {params}')
+                'Received command to uninstall program: %s', params)
             q = "description='{}'".format(params)
             try:
                 out = run_cmd(
@@ -184,13 +182,13 @@ class AgentClient:
                 return {'error': 0, 'output': out}
             except CalledProcessError as ex:
                 logger.error(
-                    f'Failed to uninstall program: {params}')
+                    'Failed to uninstall program: %s', params)
                 return {'error': 1,
                         'output': ex.stdout}
 
         elif cmd == Command.RUN_CMD:
             logger.info(
-                f'Received command to run custom command: {params}')
+                'Received command to run custom command: %s', params)
             try:
                 out = run_cmd(params, shell=True)
                 return {'error': 0, 'output': out}
@@ -199,11 +197,11 @@ class AgentClient:
             except FileNotFoundError as ex:
                 output = str(ex)
             logger.error(
-                f'Failed to run custom command: {params}')
+                'Failed to run custom command: %s', params)
             return {'error': 1, 'output': output}
         else:
-            msg = f'Received unknown command: {cmd} (params: {params})'
-            logger.error(msg)
+            logger.error(
+                'Received unknown command: %s (params: %s)', cmd, params)
             msg = f'Received unknown command: {cmd}'
             return {'error': 1, 'output': msg}
 
@@ -241,8 +239,8 @@ class AgentClient:
                             requests.ConnectionError,
                             requests.HTTPError):
                         logger.info(
-                            'Failed to get tasks from probe server'
-                            f' ({self.ip})')
+                            'Failed to get tasks from probe server (%s)',
+                            self.ip)
             except Exception:
                 logger.exception(
                     'Unexpected error on the tasks thread')
@@ -259,19 +257,19 @@ class AgentClient:
                     if not self.agent_id:
                         logging.info(
                             'Agent is not registered on probe server'
-                            f' ({self.ip}), registering now.')
+                            ' (%s), registering now.', self.ip)
                         try:
                             self.register_agent()
                             logger.info(
-                                'Agent registered on probe server:'
-                                f' {self.ip}')
+                                'Agent registered on probe server: %s',
+                                self.ip)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             self.agent_id = None
                             logger.exception(
-                                'Failed to register Agent on probe'
-                                f' server: {self.ip}')
+                                'Failed to register Agent on probe server: %s',
+                                self.ip)
                             shutdown.wait(10)
                             continue
 
@@ -287,14 +285,14 @@ class AgentClient:
                             cfg.set_pcs_time(time.time())
                         except CalledProcessError as ex:
                             logger.exception(
-                                'Failed to send computer status'
-                                f' to server {self.ip}: {ex.stdout}')
+                                'Failed to send computer status to server'
+                                ' %s: %s', self.ip, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
-                                'Failed to send computer status'
-                                f' to server {self.ip}')
+                                'Failed to send computer status to server %s',
+                                self.ip)
 
                     last_sent = cfg.get_swl_time()
                     time_elapsed = (time.time() - last_sent)/3600
@@ -309,14 +307,14 @@ class AgentClient:
                             cfg.set_swl_time(time.time())
                         except CalledProcessError as ex:
                             logger.exception(
-                                'Failed to send software list'
-                                f' to server {self.ip}: {ex.stdout}')
+                                'Failed to send software list to server'
+                                ' %s: %s', self.ip, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
-                                'Failed to send software list'
-                                f' to server: {self.ip}')
+                                'Failed to send software list to server: %s',
+                                self.ip)
 
                     acl_enabled = cfg.get_acl_check()
                     last_sent = cfg.get_acls_time()
@@ -334,14 +332,14 @@ class AgentClient:
                             cfg.set_acls_time(time.time())
                         except CalledProcessError as ex:
                             logger.exception(
-                                'Failed to send ACLs stats'
-                                f' to server {self.ip}: {ex.stdout}')
+                                'Failed to send ACLs stats to server %s: %s',
+                                self.ip, ex.stdout)
                         except (ConnectionError,
                                 requests.ConnectionError,
                                 requests.HTTPError):
                             logger.exception(
-                                'Failed to send ACLs stats'
-                                f' to server: {self.ip}')
+                                'Failed to send ACLs stats to server: %s',
+                                self.ip)
 
                     data = get_status()
                     data['agent_version'] = __version__
@@ -354,8 +352,8 @@ class AgentClient:
                             requests.ConnectionError,
                             requests.HTTPError):
                         logger.exception(
-                            'Failed to send agent status to probe'
-                            f' server: {self.ip}')
+                            'Failed to send agent status to probe server: %s',
+                            self.ip)
                 else:
                     logger.warning(
                         'Probe server IP not configured.')
@@ -603,7 +601,7 @@ def check_winlogs_limit() -> None:
                 logsize = int(line.split(':')[-1].strip())
                 if logsize < min_size:
                     logger.warning(
-                        f'Windows log size is smaller than {min_size}Bytes.')
+                        'Windows log size is smaller than %s Bytes.', min_size)
                     cfg.set_winlog_small(True)
                 else:
                     cfg.set_winlog_small(False)

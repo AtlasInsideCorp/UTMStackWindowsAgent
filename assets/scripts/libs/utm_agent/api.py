@@ -200,7 +200,7 @@ def install_antivirus(licensekey: str) -> None:
 
 def update_settings(ip: str) -> None:
     cfg.set_ip(ip)
-    logger.info(f'Server IP updated to: {ip}')
+    logger.info('Server IP updated to: %s', ip)
     update_winlogbeat(ip)
     update_filebeat(ip)
     update_metricbeat(ip)
@@ -240,8 +240,7 @@ def get_status() -> dict:
             return int(ServiceStatus.UNINSTALLED)
         if text == 'SERVICE_RUNNING':
             return int(ServiceStatus.RUNNING)
-        else:
-            return int(ServiceStatus.STOPPED)
+        return int(ServiceStatus.STOPPED)
 
     stats = dict()
     stats['filebeat'] = status(
