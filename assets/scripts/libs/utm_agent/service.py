@@ -20,6 +20,19 @@ from .utils import Command, ConfigMan, get_logger, pshell, run_cmd
 cfg = ConfigMan()
 shutdown = Event()
 logger = get_logger('service')
+fsr = {
+    "1179785": "Read",
+    "1179817": "ReadAndExecute",
+    "1180063": "Read, Write",
+    "1180095": "ReadAndExecute, Write",
+    "1245631": "ReadAndExecute, Modify, Write",
+    "2032127": "FullControl",
+    "268435456": "FullControl (Sub Only)",
+    "536870912": "GENERIC_EXECUTE",
+    "1073741824": "GENERIC_WRITE",
+    "2147483648": "GENERIC_READ",
+    "-536805376": "Modify, Synchronize",
+    "-1610612736": "ReadAndExecute, Synchronize"}
 
 
 class AgentClient:
@@ -259,46 +272,47 @@ def disable_interface(interface):
     return run_cmd(cmd, timeout=30)
 
 
-def list_installed_software() -> list:
-    def _get_soft(hive, flag) -> list:
-        a_reg = winreg.ConnectRegistry(None, hive)
+def _get_soft(hive, flag) -> list:
+    a_reg = winreg.ConnectRegistry(None, hive)
+    try:
+        rpath = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+        a_key = winreg.OpenKey(
+            a_reg, rpath, 0, winreg.KEY_READ | flag)
+    except FileNotFoundError:
+        return []
+
+    software_list = []
+
+    count_subkey = winreg.QueryInfoKey(a_key)[0]
+
+    for i in range(count_subkey):
+        software = {}
         try:
-            rpath = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-            a_key = winreg.OpenKey(
-                a_reg, rpath, 0, winreg.KEY_READ | flag)
-        except FileNotFoundError:
-            return []
+            asubkey_name = winreg.EnumKey(a_key, i)
+            asubkey = winreg.OpenKey(a_key, asubkey_name)
+            software['name'] = winreg.QueryValueEx(
+                asubkey, "DisplayName")[0]
 
-        software_list = []
-
-        count_subkey = winreg.QueryInfoKey(a_key)[0]
-
-        for i in range(count_subkey):
-            software = {}
             try:
-                asubkey_name = winreg.EnumKey(a_key, i)
-                asubkey = winreg.OpenKey(a_key, asubkey_name)
-                software['name'] = winreg.QueryValueEx(
-                    asubkey, "DisplayName")[0]
-
-                try:
-                    software['version'] = winreg.QueryValueEx(
-                        asubkey, "DisplayVersion")[0]
-                except EnvironmentError:
-                    software['version'] = None
-
-                try:
-                    software['publisher'] = winreg.QueryValueEx(
-                        asubkey, "Publisher")[0]
-                except EnvironmentError:
-                    software['publisher'] = None
-
-                software_list.append(software)
+                software['version'] = winreg.QueryValueEx(
+                    asubkey, "DisplayVersion")[0]
             except EnvironmentError:
-                continue
+                software['version'] = None
 
-        return software_list
+            try:
+                software['publisher'] = winreg.QueryValueEx(
+                    asubkey, "Publisher")[0]
+            except EnvironmentError:
+                software['publisher'] = None
 
+            software_list.append(software)
+        except EnvironmentError:
+            continue
+
+    return software_list
+
+
+def list_installed_software() -> list:
     software_list = _get_soft(winreg.HKEY_LOCAL_MACHINE,
                               winreg.KEY_WOW64_32KEY)
     software_list.extend(_get_soft(winreg.HKEY_LOCAL_MACHINE,
@@ -403,20 +417,31 @@ def _get_users() -> List[dict]:
     return users
 
 
+def _get_folder(path: str) -> List[dict]:
+    cmd = f'Get-Acl "{path}"'
+    cmd += '|Select-Object -Property Owner -ExpandProperty Access'
+    cmd += '|Out-String -width 2048'
+    folder: Dict[str, Any] = dict(folder=path)
+    folder['access'] = []
+    for line in map(str.strip, pshell(cmd).splitlines()):
+        if not line:
+            continue
+        key, val = map(str.strip, line.split(' : '))
+        if key == 'Owner':
+            folder['owner'] = val
+            acl = dict()
+        elif key == 'FileSystemRights':
+            if val.strip('-').isnumeric():
+                val = fsr.get(val, val)
+            acl[key] = val
+        else:
+            acl[key] = val
+        if key == 'PropagationFlags':
+            folder['access'].append(acl)
+    return folder
+
+
 def _get_folders() -> List[dict]:
-    fsr = {
-        "1179785": "Read",
-        "1179817": "ReadAndExecute",
-        "1180063": "Read, Write",
-        "1180095": "ReadAndExecute, Write",
-        "1245631": "ReadAndExecute, Modify, Write",
-        "2032127": "FullControl",
-        "268435456": "FullControl (Sub Only)",
-        "536870912": "GENERIC_EXECUTE",
-        "1073741824": "GENERIC_WRITE",
-        "2147483648": "GENERIC_READ",
-        "-536805376": "Modify, Synchronize",
-        "-1610612736": "ReadAndExecute, Synchronize"}
     folders: List[dict] = []
     cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
     cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
@@ -426,28 +451,7 @@ def _get_folders() -> List[dict]:
                 continue
             if element.name[0] in '.$':
                 continue
-            cmd = f'Get-Acl "{element.path}"'
-            cmd += '|Select-Object -Property Owner -ExpandProperty Access'
-            cmd += '|Out-String -width 2048'
-            folder: Dict[str, Any] = dict(folder=element.path)
-            access: List[dict] = []
-            for line in map(str.strip, pshell(cmd).splitlines()):
-                if not line:
-                    continue
-                key, val = map(str.strip, line.split(' : '))
-                if key == 'Owner':
-                    folder['owner'] = val
-                    acl = dict()
-                elif key == 'FileSystemRights':
-                    if val.strip('-').isnumeric():
-                        val = fsr.get(val, val)
-                    acl[key] = val
-                else:
-                    acl[key] = val
-                if key == 'PropagationFlags':
-                    access.append(acl)
-            folder['access'] = access
-            folders.append(folder)
+            folders.append(_get_folder(element.path))
 
 
 def computer_stats() -> dict:
