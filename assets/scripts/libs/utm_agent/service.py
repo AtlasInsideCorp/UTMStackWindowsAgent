@@ -40,11 +40,10 @@ class AgentClient:
             r.raise_for_status()
             if raw:
                 return r.content
-            else:
-                resp = r.json()
-                if resp['error'] == 2:  # Agent not registered
-                    cfg.set_agent_id('')
-                return resp
+            resp = r.json()
+            if resp['error'] == 2:  # Agent not registered
+                cfg.set_agent_id('')
+            return resp
 
     def register_agent(self) -> None:
         self.agent_id = socket.gethostname()
@@ -141,8 +140,7 @@ class AgentClient:
                             'Failed to disable interface: %s', interface)
                 if failed:
                     return {'error': 1, 'output': output}
-                else:
-                    return {'error': 0, 'output': output}
+                return {'error': 0, 'output': output}
             except CalledProcessError as ex:
                 logger.error('Failed to isolate the computer.')
                 return {'error': 1,
