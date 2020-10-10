@@ -592,8 +592,7 @@ def _run_job(cmd, params) -> dict:
 def _check_winlogs_limit() -> None:
     min_size = 209715200
     try:
-        out = subprocess.check_output(
-            ('wevtutil', 'gl', 'Application'), text=True)
+        out = run_cmd(('wevtutil', 'gl', 'Application'))
         for line in out.splitlines():
             line = line.strip()
             if line.startswith('maxSize:'):

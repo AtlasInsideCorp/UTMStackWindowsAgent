@@ -215,19 +215,16 @@ def nssm(cmd: str, name: str) -> Optional[str]:
         return None
     nssm_bin = os.path.join(cfg.app_dir, 'nssm.exe')
     if cmd == 'restart':
-        subprocess.run(
-            (nssm_bin, 'stop', name))
+        subprocess.run((nssm_bin, 'stop', name), check=False)
         sleep(1)
         try:
-            out = subprocess.check_output(
-                (nssm_bin, 'start', name), text=True)
+            out = run_cmd((nssm_bin, 'start', name))
             out = out.replace('\x00', '').strip()
         except CalledProcessError:
             out = None
     else:
         try:
-            out = subprocess.check_output(
-                (nssm_bin, cmd, name), text=True)
+            out = run_cmd((nssm_bin, cmd, name))
             out = out.replace('\x00', '').strip()
         except CalledProcessError:
             out = None

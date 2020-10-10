@@ -215,11 +215,12 @@ def get_logger(name: str) -> logging.Logger:
 
 
 def run_cmd(cmd: tuple, **kwargs) -> str:
+    """Run command and return output."""
     kwargs['stdout'] = subprocess.PIPE
-    kwargs['stderr'] = subprocess.STDOUT
-    kwargs['text'] = True
-    kwargs['check'] = True
-    return subprocess.run(cmd, **kwargs).stdout
+    kwargs.setdefault('stderr', subprocess.STDOUT)
+    kwargs.setdefault('text', True)
+    kwargs.setdefault('check', True)
+    return subprocess.run(cmd, **kwargs).stdout  # noqa
 
 
 def pshell(cmd: str) -> str:
