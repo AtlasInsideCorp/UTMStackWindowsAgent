@@ -25,6 +25,7 @@ class ServiceStatus(IntEnum):
     RUNNING = 1
 
 
+# pylama:ignore=R0904
 class ConfigMan():
     def __init__(self) -> None:
         self.app_dir = os.path.dirname(os.path.dirname(os.path.dirname(

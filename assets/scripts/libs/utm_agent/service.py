@@ -4,7 +4,6 @@ import json
 import logging
 import os
 import socket
-import subprocess
 import time
 import winreg
 from subprocess import CalledProcessError, TimeoutExpired
@@ -63,46 +62,139 @@ class AgentClient:
                     zfile.extractall(cfg.app_dir)
             shutdown.set()
 
+    def _check_for_updates(self) -> None:
+        last_checked = cfg.get_last_check_for_updates()
+        last_checked = (time.time() - last_checked)/3600
+        if last_checked >= 1:
+            logger.info('Checking for app updates.')
+            try:
+                self.check_for_updates()
+                if not shutdown.is_set():
+                    logger.info('There are no app updates.')
+            except Exception as ex:
+                logger.error(
+                    'Failed checking for updates: %s', ex)
+
+    def _process_tasks(self) -> None:
+        logger.info('Requesting tasks to probe server.')
+        try:
+            jobs = self.api_call('get_jobs')['jobs']
+            cfg.add_jobs(jobs)
+            jobs = cfg.get_jobs()
+            for job_id, cmd_id, params in jobs:
+                cfg.remove_job(job_id)
+                res = _run_job(cmd_id, params)
+                data = {'job_id': job_id,
+                        'result': json.dumps(res)}
+                self.api_call('set_job_result', **data)
+            if not jobs:
+                logger.info('There are not new tasks.')
+        except (ConnectionError,
+                requests.ConnectionError,
+                requests.HTTPError):
+            logger.info(
+                'Failed to get tasks from probe server (%s)', self.ip_addr)
+
     def start_jobs_worker(self) -> None:
         while not shutdown.is_set():
             try:
                 if self.ip_addr and cfg.get_agent_id():
-                    last_checked = cfg.get_last_check_for_updates()
-                    last_checked = (time.time() - last_checked)/3600
-                    if last_checked >= 1:
-                        logger.info('Checking for app updates.')
-                        try:
-                            self.check_for_updates()
-                            if not shutdown.is_set():
-                                logger.info('There are no app updates.')
-                        except Exception as ex:
-                            logger.error(
-                                'Failed checking for updates: %s', ex)
-
-                    logger.info('Requesting tasks to probe server.')
-                    try:
-                        jobs = self.api_call('get_jobs')['jobs']
-                        cfg.add_jobs(jobs)
-                        jobs = cfg.get_jobs()
-                        for job_id, cmd_id, params in jobs:
-                            cfg.remove_job(job_id)
-                            res = _run_job(cmd_id, params)
-                            data = {'job_id': job_id,
-                                    'result': json.dumps(res)}
-                            self.api_call(
-                                'set_job_result', **data)
-                        if not jobs:
-                            logger.info('There are not new tasks.')
-                    except (ConnectionError,
-                            requests.ConnectionError,
-                            requests.HTTPError):
-                        logger.info(
-                            'Failed to get tasks from probe server (%s)',
-                            self.ip_addr)
+                    self._check_for_updates()
+                    self._process_tasks()
             except Exception:
-                logger.exception(
-                    'Unexpected error on the tasks thread')
+                logger.exception('Unexpected error on the tasks thread')
             shutdown.wait(self.jobs_delay)
+
+    def _register_agent(self) -> None:
+        try:
+            self.register_agent()
+            logger.info('Agent registered on probe server: %s', self.ip_addr)
+        except (ConnectionError,
+                requests.ConnectionError,
+                requests.HTTPError):
+            self.agent_id = None
+            logger.exception(
+                'Failed to register Agent on probe server: %s', self.ip_addr)
+
+    def _send_computer_status(self) -> None:
+        last_sent = cfg.get_pcs_time()
+        time_elapsed = (time.time() - last_sent)/3600
+        if time_elapsed >= 24:
+            try:
+                logger.info(
+                    'Sending computer status to server.')
+                self.api_call(
+                    'computer_status', status=json.dumps(computer_stats()))
+                cfg.set_pcs_time(time.time())
+            except CalledProcessError as ex:
+                logger.exception(
+                    'Failed to send computer status to server %s: %s',
+                    self.ip_addr, ex.stdout)
+            except (ConnectionError,
+                    requests.ConnectionError,
+                    requests.HTTPError):
+                logger.exception(
+                    'Failed to send computer status to server %s',
+                    self.ip_addr)
+
+    def _send_software_list(self) -> None:
+        last_sent = cfg.get_swl_time()
+        time_elapsed = (time.time() - last_sent)/3600
+        if time_elapsed >= 24:
+            try:
+                logger.info('Sending software list to server.')
+                self.api_call(
+                    'software_status',
+                    status=json.dumps(list_installed_software()))
+                cfg.set_swl_time(time.time())
+            except CalledProcessError as ex:
+                logger.exception(
+                    'Failed to send software list to server %s: %s',
+                    self.ip_addr, ex.stdout)
+            except (ConnectionError,
+                    requests.ConnectionError,
+                    requests.HTTPError):
+                logger.exception(
+                    'Failed to send software list to server: %s',
+                    self.ip_addr)
+
+    def _send_user_list(self) -> None:
+        acl_enabled = cfg.get_acl_check()
+        last_sent = cfg.get_acls_time()
+        time_elapsed = (time.time() - last_sent)/3600
+        if acl_enabled and time_elapsed >= 24:
+            try:
+                logger.info('Requesting users list.')
+                users = self.api_call(
+                    'get_ldap_users')['users']
+                logger.info(
+                    'Sending ACLs stats to server.')
+                self.api_call(
+                    'acls_status',
+                    status=json.dumps(acls_stats(users)))
+                cfg.set_acls_time(time.time())
+            except CalledProcessError as ex:
+                logger.exception(
+                    'Failed to send ACLs stats to server %s: %s',
+                    self.ip_addr, ex.stdout)
+            except (ConnectionError,
+                    requests.ConnectionError,
+                    requests.HTTPError):
+                logger.exception(
+                    'Failed to send ACLs stats to server: %s',
+                    self.ip_addr)
+
+    def _send_agent_status(self) -> None:
+        logger.info('Sending agent status to probe server.')
+        data = get_status()
+        data['agent_version'] = __version__
+        try:
+            self.api_call('update_status', **data)
+        except (ConnectionError,
+                requests.ConnectionError,
+                requests.HTTPError):
+            logger.exception('Failed to send agent status to probe server: %s',
+                             self.ip_addr)
 
     def start_stats_worker(self) -> None:
         while not shutdown.is_set():
@@ -116,108 +208,19 @@ class AgentClient:
                         logging.info(
                             'Agent is not registered on probe server'
                             ' (%s), registering now.', self.ip_addr)
-                        try:
-                            self.register_agent()
-                            logger.info(
-                                'Agent registered on probe server: %s',
-                                self.ip_addr)
-                        except (ConnectionError,
-                                requests.ConnectionError,
-                                requests.HTTPError):
-                            self.agent_id = None
-                            logger.exception(
-                                'Failed to register Agent on probe server: %s',
-                                self.ip_addr)
+                        self._register_agent()
+                        if not self.agent_id:
                             shutdown.wait(10)
                             continue
 
-                    last_sent = cfg.get_pcs_time()
-                    time_elapsed = (time.time() - last_sent)/3600
-                    if time_elapsed >= 24:
-                        try:
-                            logger.info(
-                                'Sending computer status to server.')
-                            self.api_call(
-                                'computer_status',
-                                status=json.dumps(computer_stats()))
-                            cfg.set_pcs_time(time.time())
-                        except CalledProcessError as ex:
-                            logger.exception(
-                                'Failed to send computer status to server'
-                                ' %s: %s', self.ip_addr, ex.stdout)
-                        except (ConnectionError,
-                                requests.ConnectionError,
-                                requests.HTTPError):
-                            logger.exception(
-                                'Failed to send computer status to server %s',
-                                self.ip_addr)
-
-                    last_sent = cfg.get_swl_time()
-                    time_elapsed = (time.time() - last_sent)/3600
-                    if time_elapsed >= 24:
-                        try:
-                            logger.info(
-                                'Sending software list to server.')
-                            self.api_call(
-                                'software_status',
-                                status=json.dumps(
-                                    list_installed_software()))
-                            cfg.set_swl_time(time.time())
-                        except CalledProcessError as ex:
-                            logger.exception(
-                                'Failed to send software list to server'
-                                ' %s: %s', self.ip_addr, ex.stdout)
-                        except (ConnectionError,
-                                requests.ConnectionError,
-                                requests.HTTPError):
-                            logger.exception(
-                                'Failed to send software list to server: %s',
-                                self.ip_addr)
-
-                    acl_enabled = cfg.get_acl_check()
-                    last_sent = cfg.get_acls_time()
-                    time_elapsed = (time.time() - last_sent)/3600
-                    if acl_enabled and time_elapsed >= 24:
-                        try:
-                            logger.info('Requesting users list.')
-                            users = self.api_call(
-                                'get_ldap_users')['users']
-                            logger.info(
-                                'Sending ACLs stats to server.')
-                            self.api_call(
-                                'acls_status',
-                                status=json.dumps(acls_stats(users)))
-                            cfg.set_acls_time(time.time())
-                        except CalledProcessError as ex:
-                            logger.exception(
-                                'Failed to send ACLs stats to server %s: %s',
-                                self.ip_addr, ex.stdout)
-                        except (ConnectionError,
-                                requests.ConnectionError,
-                                requests.HTTPError):
-                            logger.exception(
-                                'Failed to send ACLs stats to server: %s',
-                                self.ip_addr)
-
-                    data = get_status()
-                    data['agent_version'] = __version__
-                    logger.info(
-                        'Sending agent status to probe server.')
-                    try:
-                        self.api_call(
-                            'update_status', **data)
-                    except (ConnectionError,
-                            requests.ConnectionError,
-                            requests.HTTPError):
-                        logger.exception(
-                            'Failed to send agent status to probe server: %s',
-                            self.ip_addr)
+                    self._send_agent_status()
+                    self._send_computer_status()
+                    self._send_software_list()
+                    self._send_user_list()
                 else:
-                    logger.warning(
-                        'Probe server IP not configured.')
+                    logger.warning('Probe server IP not configured.')
             except Exception:
-                logger.exception(
-                    'Unexpected error on the status thread')
+                logger.exception('Unexpected error on the status thread')
             if cfg.get_agent_id():
                 shutdown.wait(self.stats_delay)
             else:
@@ -344,18 +347,16 @@ def acls_stats(users: List[dict]) -> list:
     return acls
 
 
-def computer_stats() -> dict:
-    computer_data: Dict[str, Any] = dict()
-
-    # HOST
+def _get_sid() -> str:
     host_name = socket.gethostname()
     cmd = '$ID = (new-object System.Security.Principal.NTAccount("'
     cmd += host_name + '$"))\n'
     ident = '[System.Security.Principal.SecurityIdentifier]'
     cmd += f'return $ID.Translate( {ident} ).toString()'
-    computer_data["objectSid"] = pshell(cmd).strip()
+    return pshell(cmd).strip()
 
-    # NETWORK
+
+def _get_ip_list() -> List[dict]:
     ip_list: List[dict] = []
     cmd = "foreach ($IF in Get-NetIPAddress) {$IF.IPAddress"
     cmd += "+'|'+ $IF.InterfaceIndex +'|'+ $IF.PrefixLength"
@@ -365,9 +366,10 @@ def computer_stats() -> dict:
             "PrefixOrigin", "SuffixOrigin", "AddressState"]
     for net in pshell(cmd).strip().splitlines():
         ip_list.append(dict(zip(keys, net.split('|'))))
-    computer_data["ip_list"] = ip_list
+    return ip_list
 
-    # GROUPS
+
+def _get_groups() -> list:
     groups: List[dict] = []
     out = pshell(
         'foreach($LG in Get-LocalGroup){$LG.Name'
@@ -384,9 +386,10 @@ def computer_stats() -> dict:
                 dict(zip(['ObjectClass', 'Name'], elem.split("|"))))
         group['Members'] = members
         groups.append(group)
-    computer_data["localGroups"] = groups
+    return groups
 
-    # USERS
+
+def _get_users() -> List[dict]:
     users: List[dict] = []
     out = pshell(
         'foreach($U in Get-LocalUser){$U.Name +"|"+ $U.Enabled'
@@ -397,9 +400,10 @@ def computer_stats() -> dict:
         if user['Name'][-1] == "$":
             continue
         users.append(user)
-    computer_data["localUsers"] = users
+    return users
 
-    # FOLDERS
+
+def _get_folders() -> List[dict]:
     fsr = {
         "1179785": "Read",
         "1179817": "ReadAndExecute",
@@ -413,7 +417,7 @@ def computer_stats() -> dict:
         "2147483648": "GENERIC_READ",
         "-536805376": "Modify, Synchronize",
         "-1610612736": "ReadAndExecute, Synchronize"}
-    folders = []
+    folders: List[dict] = []
     cmd = 'Get-WmiObject Win32_LogicalDisk -Filter DriveType=3'
     cmd += '|Format-Table -Property DeviceID -HideTableHeaders'
     for drive in pshell(cmd).split():
@@ -444,149 +448,159 @@ def computer_stats() -> dict:
                     access.append(acl)
             folder['access'] = access
             folders.append(folder)
-    computer_data["localFolders"] = folders
-    return computer_data
 
 
-def _run_job(cmd, params) -> dict:
-    if cmd == Command.SHUTDOWN_SERVER:
-        logger.info(
-            'Received command to shutdown the computer.')
-        try:
-            out = run_cmd(('shutdown', '-s', '-f', '-t', '0'))
-            return {'error': 0, 'output': out}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to shutdown the computer.')
-            return {'error': 1,
-                    'output': ex.stdout}
+def computer_stats() -> dict:
+    return dict(objectSid=_get_sid(),
+                ip_list=_get_ip_list(),
+                localGroups=_get_groups(),
+                localUsers=_get_users(),
+                localFolders=_get_folders())
 
-    elif cmd == Command.DISABLE_USER:
-        logger.info(
-            'Received command to disable user: %s', params)
-        output = ''
-        # logout user
-        try:
-            out = run_cmd(('quser', params))
-            uid = out.strip().splitlines()[1].split()[2]
-            output = run_cmd(('logoff', uid))
-        except (TypeError, IndexError):
-            logger.warning(
-                'Failed to log off user: %s', params)
-        except CalledProcessError as ex:
-            logger.warning(
-                'Failed to log off user: %s', params)
-            output = ex.stdout
-        # disable user
-        try:
-            output += run_cmd(
-                ('net', 'user', params, '/active:no'))
-            return {'error': 0, 'output': output}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to disable user: %s', params)
-            output += ex.stdout
-            return {'error': 1,
-                    'output': output}
 
-    elif cmd == Command.BLOCK_IP:
-        logger.info(
-            'Received command to block ip: %s', params)
-        output = ''
-        try:
-            output += block_ip(params, 'in')
-            output += block_ip(params, 'out')
-            return {'error': 0, 'output': output}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to block ip: %s', params)
-            output += ex.stdout
-            return {'error': 1,
-                    'output': output}
-
-    elif cmd == Command.ISOLATE_HOST:
-        logger.info(
-            'Received command to isolate the computer.')
-        output = ''
-        try:
-            out = run_cmd(
-                ('netsh', 'interface', 'show', 'interface'))
-            interfaces = out.strip().splitlines()[2:]
-            failed = False
-            for line in interfaces:
-                try:
-                    interface = line.split(maxsplit=3)[3]
-                    output += disable_interface(interface)
-                except (CalledProcessError, TimeoutExpired) as ex:
-                    failed = True
-                    if hasattr(ex, 'stdout'):
-                        output += ex.stdout
-                    logger.error(
-                        'Failed to disable interface: %s', interface)
-            if failed:
-                return {'error': 1, 'output': output}
-            return {'error': 0, 'output': output}
-        except CalledProcessError as ex:
-            logger.error('Failed to isolate the computer.')
-            return {'error': 1,
-                    'output': ex.stdout}
-
-    elif cmd == Command.RESTART_SERVER:
-        logger.info('Received command to restart the computer.')
-        try:
-            out = run_cmd(('shutdown', '-r', '-f', '-t', '0'))
-            return {'error': 0, 'output': out}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to restart the computer.')
-            return {'error': 1,
-                    'output': ex.stdout}
-
-    elif cmd == Command.KILL_PROCESS:
-        logger.info(
-            'Received command to kill process: %s', params)
-        try:
-            out = run_cmd(
-                ('taskkill', '/F', '/T', '/IM', params))
-            return {'error': 0, 'output': out}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to kill process: %s', params)
-            return {'error': 1,
-                    'output': ex.stdout}
-
-    elif cmd == Command.UNINSTALL_PROGRAM:
-        logger.info(
-            'Received command to uninstall program: %s', params)
-        cond = "description='{}'".format(params)
-        try:
-            out = run_cmd(
-                ('wmic', 'product', 'where', cond, 'uninstall'))
-            return {'error': 0, 'output': out}
-        except CalledProcessError as ex:
-            logger.error(
-                'Failed to uninstall program: %s', params)
-            return {'error': 1,
-                    'output': ex.stdout}
-
-    elif cmd == Command.RUN_CMD:
-        logger.info(
-            'Received command to run custom command: %s', params)
-        try:
-            out = run_cmd(params, shell=True)
-            return {'error': 0, 'output': out}
-        except CalledProcessError as ex:
-            output = ex.stdout
-        except FileNotFoundError as ex:
-            output = str(ex)
+def _shutdown_server() -> dict:
+    logger.info(
+        'Received command to shutdown the computer.')
+    try:
+        out = run_cmd(('shutdown', '-s', '-f', '-t', '0'))
+        return {'error': 0, 'output': out}
+    except CalledProcessError as ex:
         logger.error(
-            'Failed to run custom command: %s', params)
+            'Failed to shutdown the computer.')
+        return {'error': 1,
+                'output': ex.stdout}
+
+
+def _disable_user(user: str) -> dict:
+    logger.info(
+        'Received command to disable user: %s', user)
+    output = ''
+    # logout user
+    try:
+        out = run_cmd(('quser', user))
+        uid = out.strip().splitlines()[1].split()[2]
+        output = run_cmd(('logoff', uid))
+    except (TypeError, IndexError):
+        logger.warning(
+            'Failed to log off user: %s', user)
+    except CalledProcessError as ex:
+        logger.warning(
+            'Failed to log off user: %s', user)
+        output = ex.stdout
+    # disable user
+    try:
+        output += run_cmd(('net', 'user', user, '/active:no'))
+        return {'error': 0, 'output': output}
+    except CalledProcessError as ex:
+        logger.error('Failed to disable user: %s', user)
+        output += ex.stdout
         return {'error': 1, 'output': output}
+
+
+def _block_ip(address: str) -> dict:
+    logger.info('Received command to block ip: %s', address)
+    output = ''
+    try:
+        output += block_ip(address, 'in')
+        output += block_ip(address, 'out')
+        return {'error': 0, 'output': output}
+    except CalledProcessError as ex:
+        logger.error('Failed to block ip: %s', address)
+        output += ex.stdout
+        return {'error': 1, 'output': output}
+
+
+def _isolete_host() -> dict:
+    logger.info('Received command to isolate the computer.')
+    output = ''
+    try:
+        out = run_cmd(('netsh', 'interface', 'show', 'interface'))
+        interfaces = out.strip().splitlines()[2:]
+        failed = False
+        for line in interfaces:
+            try:
+                interface = line.split(maxsplit=3)[3]
+                output += disable_interface(interface)
+            except (CalledProcessError, TimeoutExpired) as ex:
+                failed = True
+                if hasattr(ex, 'stdout'):
+                    output += ex.stdout
+                logger.error(
+                    'Failed to disable interface: %s', interface)
+        if failed:
+            return {'error': 1, 'output': output}
+        return {'error': 0, 'output': output}
+    except CalledProcessError as ex:
+        logger.error('Failed to isolate the computer.')
+        return {'error': 1, 'output': ex.stdout}
+
+
+def _restart_server() -> dict:
+    logger.info('Received command to restart the computer.')
+    try:
+        out = run_cmd(('shutdown', '-r', '-f', '-t', '0'))
+        return {'error': 0, 'output': out}
+    except CalledProcessError as ex:
+        logger.error('Failed to restart the computer.')
+        return {'error': 1, 'output': ex.stdout}
+
+
+def _kill_process(pid: str) -> dict:
+    logger.info('Received command to kill process: %s', pid)
+    try:
+        out = run_cmd(('taskkill', '/F', '/T', '/IM', pid))
+        return {'error': 0, 'output': out}
+    except CalledProcessError as ex:
+        logger.error('Failed to kill process: %s', pid)
+        return {'error': 1, 'output': ex.stdout}
+
+
+def _uninstall_program(program: str) -> dict:
+    logger.info('Received command to uninstall program: %s', program)
+    cond = "description='{}'".format(program)
+    try:
+        out = run_cmd(('wmic', 'product', 'where', cond, 'uninstall'))
+        return {'error': 0, 'output': out}
+    except CalledProcessError as ex:
+        logger.error('Failed to uninstall program: %s', program)
+        return {'error': 1, 'output': ex.stdout}
+
+
+def _run_cmd(cmd: str) -> dict:
+    logger.info('Received command to run custom command: %s', cmd)
+    try:
+        out = run_cmd(cmd, shell=True)
+        return {'error': 0, 'output': out}
+    except CalledProcessError as ex:
+        output = ex.stdout
+    except FileNotFoundError as ex:
+        output = str(ex)
+    logger.error('Failed to run custom command: %s', cmd)
+    return {'error': 1, 'output': output}
+
+
+def _run_job(cmd, params: str) -> dict:
+    if cmd == Command.SHUTDOWN_SERVER:
+        res = _shutdown_server()
+    elif cmd == Command.DISABLE_USER:
+        res = _disable_user(params)
+    elif cmd == Command.BLOCK_IP:
+        res = _block_ip(params)
+    elif cmd == Command.ISOLATE_HOST:
+        res = _isolete_host()
+    elif cmd == Command.RESTART_SERVER:
+        res = _restart_server()
+    elif cmd == Command.KILL_PROCESS:
+        res = _kill_process(params)
+    elif cmd == Command.UNINSTALL_PROGRAM:
+        res = _uninstall_program(params)
+    elif cmd == Command.RUN_CMD:
+        res = _run_cmd(params)
     else:
         logger.error(
             'Received unknown command: %s (params: %s)', cmd, params)
-        msg = f'Received unknown command: {cmd}'
-        return {'error': 1, 'output': msg}
+        return {'error': 1, 'output': f'Received unknown command: {cmd}'}
+    return res
 
 
 def _check_winlogs_limit() -> None:
