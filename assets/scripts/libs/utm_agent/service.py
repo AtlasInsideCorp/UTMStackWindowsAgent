@@ -63,146 +63,6 @@ class AgentClient:
                     zfile.extractall(cfg.app_dir)
             shutdown.set()
 
-    def run_job(self, cmd, params) -> dict:
-        if cmd == Command.SHUTDOWN_SERVER:
-            logger.info(
-                'Received command to shutdown the computer.')
-            try:
-                out = run_cmd(('shutdown', '-s', '-f', '-t', '0'))
-                return {'error': 0, 'output': out}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to shutdown the computer.')
-                return {'error': 1,
-                        'output': ex.stdout}
-
-        elif cmd == Command.DISABLE_USER:
-            logger.info(
-                'Received command to disable user: %s', params)
-            output = ''
-            # logout user
-            try:
-                out = run_cmd(('quser', params))
-                uid = out.strip().splitlines()[1].split()[2]
-                output = run_cmd(('logoff', uid))
-            except (TypeError, IndexError):
-                logger.warning(
-                    'Failed to log off user: %s', params)
-            except CalledProcessError as ex:
-                logger.warning(
-                    'Failed to log off user: %s', params)
-                output = ex.stdout
-            # disable user
-            try:
-                output += run_cmd(
-                    ('net', 'user', params, '/active:no'))
-                return {'error': 0, 'output': output}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to disable user: %s', params)
-                output += ex.stdout
-                return {'error': 1,
-                        'output': output}
-
-        elif cmd == Command.BLOCK_IP:
-            logger.info(
-                'Received command to block ip: %s', params)
-            output = ''
-            try:
-                output += block_ip(params, 'in')
-                output += block_ip(params, 'out')
-                return {'error': 0, 'output': output}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to block ip: %s', params)
-                output += ex.stdout
-                return {'error': 1,
-                        'output': output}
-
-        elif cmd == Command.ISOLATE_HOST:
-            logger.info(
-                'Received command to isolate the computer.')
-            output = ''
-            try:
-                out = run_cmd(
-                    ('netsh', 'interface', 'show', 'interface'))
-                interfaces = out.strip().splitlines()[2:]
-                failed = False
-                for line in interfaces:
-                    try:
-                        interface = line.split(maxsplit=3)[3]
-                        output += disable_interface(interface)
-                    except (CalledProcessError, TimeoutExpired) as ex:
-                        failed = True
-                        if hasattr(ex, 'stdout'):
-                            output += ex.stdout
-                        logger.error(
-                            'Failed to disable interface: %s', interface)
-                if failed:
-                    return {'error': 1, 'output': output}
-                return {'error': 0, 'output': output}
-            except CalledProcessError as ex:
-                logger.error('Failed to isolate the computer.')
-                return {'error': 1,
-                        'output': ex.stdout}
-
-        elif cmd == Command.RESTART_SERVER:
-            logger.info('Received command to restart the computer.')
-            try:
-                out = run_cmd(('shutdown', '-r', '-f', '-t', '0'))
-                return {'error': 0, 'output': out}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to restart the computer.')
-                return {'error': 1,
-                        'output': ex.stdout}
-
-        elif cmd == Command.KILL_PROCESS:
-            logger.info(
-                'Received command to kill process: %s', params)
-            try:
-                out = run_cmd(
-                    ('taskkill', '/F', '/T', '/IM', params))
-                return {'error': 0, 'output': out}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to kill process: %s', params)
-                return {'error': 1,
-                        'output': ex.stdout}
-
-        elif cmd == Command.UNINSTALL_PROGRAM:
-            logger.info(
-                'Received command to uninstall program: %s', params)
-            q = "description='{}'".format(params)
-            try:
-                out = run_cmd(
-                    ('wmic', 'product', 'where', q, 'uninstall'))
-                return {'error': 0, 'output': out}
-            except CalledProcessError as ex:
-                logger.error(
-                    'Failed to uninstall program: %s', params)
-                return {'error': 1,
-                        'output': ex.stdout}
-
-        elif cmd == Command.RUN_CMD:
-            logger.info(
-                'Received command to run custom command: %s', params)
-            try:
-                out = run_cmd(params, shell=True)
-                return {'error': 0, 'output': out}
-            except CalledProcessError as ex:
-                output = ex.stdout
-            except FileNotFoundError as ex:
-                output = str(ex)
-            logger.error(
-                'Failed to run custom command: %s', params)
-            return {'error': 1, 'output': output}
-        else:
-            logger.error(
-                'Received unknown command: %s (params: %s)', cmd, params)
-            msg = f'Received unknown command: {cmd}'
-            return {'error': 1, 'output': msg}
-
     def start_jobs_worker(self) -> None:
         while not shutdown.is_set():
             try:
@@ -226,7 +86,7 @@ class AgentClient:
                         jobs = cfg.get_jobs()
                         for job_id, cmd_id, params in jobs:
                             cfg.remove_job(job_id)
-                            res = self.run_job(cmd_id, params)
+                            res = _run_job(cmd_id, params)
                             data = {'job_id': job_id,
                                     'result': json.dumps(res)}
                             self.api_call(
@@ -246,8 +106,8 @@ class AgentClient:
 
     def start_stats_worker(self) -> None:
         while not shutdown.is_set():
-            check_winlogs_limit()
-            check_ps_version()
+            _check_winlogs_limit()
+            _check_ps_version()
             try:
                 self.ip = cfg.get_ip()
                 if self.ip:
@@ -588,7 +448,148 @@ def computer_stats() -> dict:
     return computer_data
 
 
-def check_winlogs_limit() -> None:
+def _run_job(cmd, params) -> dict:
+    if cmd == Command.SHUTDOWN_SERVER:
+        logger.info(
+            'Received command to shutdown the computer.')
+        try:
+            out = run_cmd(('shutdown', '-s', '-f', '-t', '0'))
+            return {'error': 0, 'output': out}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to shutdown the computer.')
+            return {'error': 1,
+                    'output': ex.stdout}
+
+    elif cmd == Command.DISABLE_USER:
+        logger.info(
+            'Received command to disable user: %s', params)
+        output = ''
+        # logout user
+        try:
+            out = run_cmd(('quser', params))
+            uid = out.strip().splitlines()[1].split()[2]
+            output = run_cmd(('logoff', uid))
+        except (TypeError, IndexError):
+            logger.warning(
+                'Failed to log off user: %s', params)
+        except CalledProcessError as ex:
+            logger.warning(
+                'Failed to log off user: %s', params)
+            output = ex.stdout
+        # disable user
+        try:
+            output += run_cmd(
+                ('net', 'user', params, '/active:no'))
+            return {'error': 0, 'output': output}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to disable user: %s', params)
+            output += ex.stdout
+            return {'error': 1,
+                    'output': output}
+
+    elif cmd == Command.BLOCK_IP:
+        logger.info(
+            'Received command to block ip: %s', params)
+        output = ''
+        try:
+            output += block_ip(params, 'in')
+            output += block_ip(params, 'out')
+            return {'error': 0, 'output': output}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to block ip: %s', params)
+            output += ex.stdout
+            return {'error': 1,
+                    'output': output}
+
+    elif cmd == Command.ISOLATE_HOST:
+        logger.info(
+            'Received command to isolate the computer.')
+        output = ''
+        try:
+            out = run_cmd(
+                ('netsh', 'interface', 'show', 'interface'))
+            interfaces = out.strip().splitlines()[2:]
+            failed = False
+            for line in interfaces:
+                try:
+                    interface = line.split(maxsplit=3)[3]
+                    output += disable_interface(interface)
+                except (CalledProcessError, TimeoutExpired) as ex:
+                    failed = True
+                    if hasattr(ex, 'stdout'):
+                        output += ex.stdout
+                    logger.error(
+                        'Failed to disable interface: %s', interface)
+            if failed:
+                return {'error': 1, 'output': output}
+            return {'error': 0, 'output': output}
+        except CalledProcessError as ex:
+            logger.error('Failed to isolate the computer.')
+            return {'error': 1,
+                    'output': ex.stdout}
+
+    elif cmd == Command.RESTART_SERVER:
+        logger.info('Received command to restart the computer.')
+        try:
+            out = run_cmd(('shutdown', '-r', '-f', '-t', '0'))
+            return {'error': 0, 'output': out}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to restart the computer.')
+            return {'error': 1,
+                    'output': ex.stdout}
+
+    elif cmd == Command.KILL_PROCESS:
+        logger.info(
+            'Received command to kill process: %s', params)
+        try:
+            out = run_cmd(
+                ('taskkill', '/F', '/T', '/IM', params))
+            return {'error': 0, 'output': out}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to kill process: %s', params)
+            return {'error': 1,
+                    'output': ex.stdout}
+
+    elif cmd == Command.UNINSTALL_PROGRAM:
+        logger.info(
+            'Received command to uninstall program: %s', params)
+        q = "description='{}'".format(params)
+        try:
+            out = run_cmd(
+                ('wmic', 'product', 'where', q, 'uninstall'))
+            return {'error': 0, 'output': out}
+        except CalledProcessError as ex:
+            logger.error(
+                'Failed to uninstall program: %s', params)
+            return {'error': 1,
+                    'output': ex.stdout}
+
+    elif cmd == Command.RUN_CMD:
+        logger.info(
+            'Received command to run custom command: %s', params)
+        try:
+            out = run_cmd(params, shell=True)
+            return {'error': 0, 'output': out}
+        except CalledProcessError as ex:
+            output = ex.stdout
+        except FileNotFoundError as ex:
+            output = str(ex)
+        logger.error(
+            'Failed to run custom command: %s', params)
+        return {'error': 1, 'output': output}
+    else:
+        logger.error(
+            'Received unknown command: %s (params: %s)', cmd, params)
+        msg = f'Received unknown command: {cmd}'
+        return {'error': 1, 'output': msg}
+
+
+def _check_winlogs_limit() -> None:
     min_size = 209715200
     try:
         out = subprocess.check_output(
@@ -609,7 +610,7 @@ def check_winlogs_limit() -> None:
     logger.error('Failed to check Windows logs limit')
 
 
-def check_ps_version() -> None:
+def _check_ps_version() -> None:
     cmd = '$host.version'
     cmd += '|Format-Table -Property Major -HideTableHeaders'
     try:
