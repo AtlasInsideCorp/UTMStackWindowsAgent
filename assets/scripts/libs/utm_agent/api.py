@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Web GUI backend."""
+
 import os
 import subprocess
 import sys

@@ -1,3 +1,5 @@
+"""Shell support."""
+
 import argparse
 import logging
 import webbrowser

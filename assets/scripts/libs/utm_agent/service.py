@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""Agent service."""
+
 import io
 import json
 import logging

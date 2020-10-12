@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+"""UTMStack utilities."""
+
 import logging.handlers
 import os
 import sqlite3
