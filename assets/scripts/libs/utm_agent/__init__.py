@@ -1,4 +1,4 @@
 """UTMStack Agent module."""
 
-__version__ = '5.5.0'
+__version__ = '6.0.0'
 APP_NAME = 'UTMStack'

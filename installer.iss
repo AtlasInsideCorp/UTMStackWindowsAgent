@@ -1,5 +1,5 @@
 #define MyAppName "UTMStack"
-#define MyAppVersion "5.5.0"
+#define MyAppVersion "6.0.0"
 #define MyAppPublisher "Atlas Inside Technology LLC"
 #define MyAppURL "http://www.utmvault.com"
 #define FilebeatService "filebeat"
