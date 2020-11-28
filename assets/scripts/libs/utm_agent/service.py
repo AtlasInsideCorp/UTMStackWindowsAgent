@@ -384,6 +384,12 @@ def _get_ip_list() -> List[dict]:
     return ip_list
 
 
+def _get_mac_list() -> List[str]:
+    cmd = "Get-WmiObject win32_networkadapterconfiguration"
+    cmd += " | Format-Table -Property MacAddress -HideTableHeaders"
+    return pshell(cmd).split()
+
+
 def _get_groups() -> list:
     groups: List[dict] = []
     out = pshell(
@@ -458,6 +464,7 @@ def _get_folders() -> List[dict]:
 def computer_stats() -> dict:
     return dict(objectSid=_get_sid(),
                 ip_list=_get_ip_list(),
+                mac_list=_get_mac_list(),
                 localGroups=_get_groups(),
                 localUsers=_get_users(),
                 localFolders=_get_folders())
