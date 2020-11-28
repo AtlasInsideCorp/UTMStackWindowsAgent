@@ -424,7 +424,7 @@ def _get_users() -> List[dict]:
     return users
 
 
-def _get_folder(path: str) -> List[dict]:
+def _get_folder(path: str) -> dict:
     cmd = f'Get-Acl "{path}"'
     cmd += '|Select-Object -Property Owner -ExpandProperty Access'
     cmd += '|Out-String -width 2048'
@@ -459,6 +459,7 @@ def _get_folders() -> List[dict]:
             if element.name[0] in '.$':
                 continue
             folders.append(_get_folder(element.path))
+    return folders
 
 
 def computer_stats() -> dict:
