@@ -1,5 +1,5 @@
 # UTMStack Windows Agent
-
+![Sonarqube](https://github.com/UTMStack/windows-agent/workflows/Sonarqube/badge.svg)
 ![CI](https://github.com/UTMStack/windows-agent/workflows/CI/badge.svg)
 
 ## Pre-installation requirements
