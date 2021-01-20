@@ -1,6 +1,16 @@
 # UTMStack Windows Agent
-![Sonarqube](https://github.com/UTMStack/windows-agent/workflows/Sonarqube/badge.svg)
 ![CI](https://github.com/UTMStack/windows-agent/workflows/CI/badge.svg)
+[![Quality Gate Status](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=alert_status)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Bugs](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=bugs)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Code Smells](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=code_smells)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Coverage](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=coverage)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Duplicated Lines (%)](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=duplicated_lines_density)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Lines of Code](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=ncloc)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Maintainability Rating](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=sqale_rating)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Reliability Rating](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=reliability_rating)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Security Rating](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=security_rating)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Technical Debt](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=sqale_index)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
+[![Vulnerabilities](https://atlasinside-qube.eastus.cloudapp.azure.com/api/project_badges/measure?project=utmstack_windows_agent&metric=vulnerabilities)](https://atlasinside-qube.eastus.cloudapp.azure.com/dashboard?id=utmstack_windows_agent)
 
 ## Pre-installation requirements
 
