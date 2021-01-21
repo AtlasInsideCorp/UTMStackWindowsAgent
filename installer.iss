@@ -1,4 +1,4 @@
-#define MyAppName "UTMStack"
+#define MyAppName "UTMStack Agent"
 #define MyAppVersion "6.0.0"
 #define MyAppPublisher "Atlas Inside Technology LLC"
 #define MyAppURL "http://www.utmvault.com"
