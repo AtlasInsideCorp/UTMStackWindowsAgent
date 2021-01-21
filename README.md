@@ -1,5 +1,6 @@
 # UTMStack Windows Agent
 ![CI](https://github.com/UTMStack/windows-agent/workflows/CI/badge.svg)
+![CodeQL](https://github.com/UTMStack/windows-agent/workflows/CodeQL/badge.svg)
 [![Quality Gate Status](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=alert_status)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Bugs](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=bugs)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Code Smells](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=code_smells)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
