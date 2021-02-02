@@ -3,7 +3,6 @@
 [![Quality Gate Status](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=alert_status)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Bugs](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=bugs)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Code Smells](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=code_smells)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Coverage](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=coverage)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Duplicated Lines (%)](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=duplicated_lines_density)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Lines of Code](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=ncloc)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Maintainability Rating](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=sqale_rating)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
