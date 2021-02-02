@@ -17,7 +17,7 @@
 *	Compatible with Windows Server version 2012 R2 or higher.
 *	The Windows agent for correct operation must have Powershell version 5 or higher installed.
 *	In the case of Active Directory servers, TCP / UDP ports 389, TCP 636, TCP 3268, and TCP 3269 must be accessible from the probe. A service account must also be created with permissions to read the Active Directory data.
-*	Download the agent from https://updates.utmstack.com/assets/windows-agent-latest.exe
+*	Download the agent from https://github.com/UTMStack/windows-agent/releases/
 
 ## Graphic Installation
 
