@@ -1,15 +1,15 @@
 # UTMStack Windows Agent
 ![CI](https://github.com/UTMStack/windows-agent/workflows/CI/badge.svg)
-[![Quality Gate Status](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=alert_status)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Bugs](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=bugs)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Code Smells](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=code_smells)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Duplicated Lines (%)](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=duplicated_lines_density)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Lines of Code](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=ncloc)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Maintainability Rating](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=sqale_rating)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Reliability Rating](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=reliability_rating)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Security Rating](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=security_rating)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Technical Debt](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=sqale_index)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
-[![Vulnerabilities](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=vulnerabilities)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
+[![Quality Gate Status](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=alert_status)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Bugs](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=bugs)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Code Smells](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=code_smells)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Duplicated Lines (%)](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=duplicated_lines_density)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Lines of Code](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=ncloc)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Maintainability Rating](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=sqale_rating)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Reliability Rating](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=reliability_rating)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Security Rating](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=security_rating)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Technical Debt](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=sqale_index)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
+[![Vulnerabilities](https://qube.atlasinside.com/api/project_badges/measure?project=UTMStack_windows-agent&metric=vulnerabilities)](https://qube.atlasinside.com/dashboard?id=UTMStack_windows-agent)
 
 ## Pre-installation requirements
 
