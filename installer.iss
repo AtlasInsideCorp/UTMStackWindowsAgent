@@ -6,9 +6,9 @@
 #define MetricbeatService "metricbeat"
 #define WinlogbeatService "winlogbeat"
 #define UTMSService "utmstack"
-#define AppLauncher "run.py --gui"
-#define AppReset "run.py --reset"
-#define AppService "service.py"
+#define AppLauncher "-m utm_agent --gui"
+#define AppReset "-m utm_agent --reset"
+#define AppService "-m utm_agent.service"
 #define PyExe "Python37\pythonw.exe"
 #define PyCli "Python37\python.exe"
 #define AppIcon "app.ico"
@@ -56,10 +56,10 @@ Source: "assets\*"; DestDir: "{app}"; Excludes: ".mypy_cache,*~,__pycache__,\waz
 
 [Icons]
 ; Start Menu launcher:
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"
 
 ; Desktop launcher:
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"; Tasks: desktopicon
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#PyExe}"; WorkingDir: "{app}"; Parameters: "{#AppLauncher}"; IconFilename: "{app}\{#AppIcon}"; Tasks: desktopicon
 
 
 [Run]
@@ -77,7 +77,7 @@ Filename: "{sys}\msiexec.exe"; Parameters: "/package ""{tmp}\wazuh-agent-3.11.3-
 
 ; Install UTMS service:
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "install {#UTMSService} ""{app}\{#PyCli}"" {#AppService}" ; Flags: runhidden
-Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppDirectory ""{app}\scripts"""; Flags: runhidden
+Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppDirectory ""{app}"""; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} DisplayName UTMStack"; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} AppExit Default Restart"; Flags: runhidden
 Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters: "set {#UTMSService} Start SERVICE_AUTO_START"; Flags: runhidden
@@ -85,7 +85,7 @@ Filename: "{app}\nssm.exe"; StatusMsg: "Installing UTMS service..."; Parameters:
 Filename: "{app}\nssm.exe"; StatusMsg: "Starting UTMS service..."; Parameters: "start {#UTMSService}"; Flags: runhidden
 
 ; Offer to launch app after install:
-Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLauncher}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\{#PyExe}"; WorkingDir: "{app}"; Parameters: "{#AppLauncher}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 
 [UninstallRun]
@@ -93,7 +93,7 @@ Filename: "{app}\{#PyExe}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppLaunc
 Filename: "{sys}\sc.exe"; Parameters: "stop {#UTMSService}"; Flags: runhidden
 Filename: "{sys}\sc.exe"; Parameters: "delete {#UTMSService}"; Flags: runhidden
 ; Clear configuration:
-Filename: "{app}\{#PyCli}"; WorkingDir: "{app}\scripts"; Parameters: "{#AppReset}"; Flags: runhidden
+Filename: "{app}\{#PyCli}"; WorkingDir: "{app}"; Parameters: "{#AppReset}"; Flags: runhidden
 
 ; Stop and delete Filebeat service:
 Filename: "{sys}\sc.exe"; Parameters: "stop {#FilebeatService}"; Flags: runhidden
@@ -116,7 +116,6 @@ Type: filesandordirs; Name: "{app}\Filebeat"
 Type: filesandordirs; Name: "{app}\Metricbeat"
 Type: filesandordirs; Name: "{app}\Winlogbeat"
 Type: filesandordirs; Name: "{app}\Python37"
-Type: filesandordirs; Name: "{app}\scripts"
 Type: files; Name: "{app}\appdata.db"
 
 
@@ -130,7 +129,7 @@ var
 begin
   if CurStep = ssPostInstall then begin
      Configurate := False;
-     Args := ExpandConstant('"{app}\scripts\run.py"');
+     Args := '-m utm_agent';
 
      Arg := ExpandConstant('{param:host}');
      if Arg <> '' then begin
