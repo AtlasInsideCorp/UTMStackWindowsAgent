@@ -23,7 +23,7 @@ jobs:
         pip --disable-pip-version-check install -r requirements.txt
     - name: Run Linter
       run: |
-        pylama assets/scripts/libs/utm_agent/
+        pylama assets/Python37/Lib/site-packages/utm_agent/
     # - name: Run Tests
     #   run: |
     #     pytest
