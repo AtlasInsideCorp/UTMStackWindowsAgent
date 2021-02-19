@@ -1,6 +1,6 @@
 # UTMStack Windows Agent
 
-![CI](https://github.com/UTMStack/windows-agent/workflows/CI/badge.svg)
+[![Python](https://github.com/UTMStack/windows-agent/actions/workflows/Python.yml/badge.svg)](https://github.com/UTMStack/windows-agent/actions/workflows/Python.yml)
 [![Quality Gate Status](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=alert_status)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Bugs](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=bugs)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
 [![Vulnerabilities](https://qube.atlasinside.com/api/project_badges/measure?project=utmstack_windows_agent&metric=vulnerabilities)](https://qube.atlasinside.com/dashboard?id=utmstack_windows_agent)
